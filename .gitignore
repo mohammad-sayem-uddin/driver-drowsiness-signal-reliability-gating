@@ -1,0 +1,48 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Virtual Environments
+.venv/
+venv/
+ENV/
+env/
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDE & Editor files
+.vscode/
+.idea/
+.claude/
+gitlab-vscode-extension-main/
+
+# Datasets & Heavy Assets (Keep directory structure via .gitkeep)
+data/*
+!data/.gitkeep
+
+# Model Binaries (Keep directory structure via .gitkeep)
+models/*.tflite
+models/*.onnx
+models/*.pth
+!models/.gitkeep
+
+# Runtime logs & generated CSVs
+*.log
+drowsiness_events_log.csv
+
+# Pytest / Coverage / Profiling
+.cache
+.pytest_cache/
+.coverage
+htmlcov/
