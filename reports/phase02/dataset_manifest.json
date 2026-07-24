@@ -1,0 +1,39 @@
+{
+  "manifest_version": "1.0.0",
+  "created_at": "2026-07-24T19:11:00Z",
+  "project": "Driver Drowsiness Signal Reliability Gating",
+  "phase": "Phase 02 — Data Foundation & Benchmark Infrastructure",
+  "reproducibility": {
+    "random_seed": 42,
+    "input_shape": [24, 24, 1],
+    "normalization": "grayscale_equalized_hist",
+    "subject_independent_split": true,
+    "train_ratio": 0.70,
+    "val_ratio": 0.15,
+    "test_ratio": 0.15
+  },
+  "datasets": {
+    "mrl_eyes": {
+      "status": "INGESTED_AND_VERIFIED",
+      "raw_path": "data/raw/mrl_eyes",
+      "processed_path": "data/processed",
+      "total_samples": 200,
+      "class_balance": { "open": 100, "closed": 100 },
+      "license": "CC BY 4.0"
+    },
+    "nthu_ddd": {
+      "status": "MANUAL_DOWNLOAD_GUIDE_PREPARED",
+      "raw_path": "data/raw/nthu_ddd",
+      "license": "Restricted Academic EULA"
+    },
+    "yawdd": {
+      "status": "MANUAL_DOWNLOAD_GUIDE_PREPARED",
+      "raw_path": "data/raw/yawdd",
+      "license": "Open Academic Use"
+    }
+  },
+  "checksums": {
+    "dataset_metadata_csv": "data/metadata/dataset_metadata.csv",
+    "split_manifest_csv": "data/metadata/split_manifest.csv"
+  }
+}
