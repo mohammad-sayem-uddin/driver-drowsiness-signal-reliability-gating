@@ -80,7 +80,7 @@ class SignalQuality:
 class RobustnessSnapshot:
     """
     Complete robustness assessment for one frame.  Every sub-score
-    is exposed for HUD display and research logging.
+    is exposed for HUD display, research logging, and ablation studies.
     """
     # --- Sub-scores (0–1 each, higher = better) ---
     landmark_stability: float = 1.0
@@ -90,6 +90,9 @@ class RobustnessSnapshot:
 
     # --- Final reliability (0–1, higher = more trustworthy) ---
     system_reliability: float = 1.0
+    heuristic_reliability: float = 1.0
+    learned_reliability: float = 1.0
+    estimator_mode: str = "geometric"
 
     # --- Raw inputs (forwarded for logging) ---
     landmark_jitter: float = 0.0
@@ -97,6 +100,73 @@ class RobustnessSnapshot:
 
     # --- Advisory flags ---
     alert_suppressed: bool = False
+
+
+# ═══════════════════════════════════════════════════════════════════════
+# Phase 2.5: Learned Reliability Estimator Framework
+# ═══════════════════════════════════════════════════════════════════════
+
+class LearnedReliabilityEstimator:
+    """
+    Parametric, Temperature-Calibrated Logistic Reliability Estimator.
+
+    Formulates signal reliability as a calibrated probabilistic estimate:
+        R_learned(S; w, b, T) = sigmoid((w^T * ln(S + epsilon) + b) / T)
+
+    Theoretical Grounding:
+    When w = [0.35, 0.25, 0.20, 0.20], b = 0.0, and T = 1.0, this formulation
+    analytically reduces to the weighted geometric mean:
+        exp(0.35*ln S_stab + 0.25*ln S_bright + 0.20*ln S_track + 0.20*ln S_consist)
+      = S_stab^0.35 * S_bright^0.25 * S_track^0.20 * S_consist^0.20
+    """
+
+    def __init__(
+        self,
+        weights: Tuple[float, float, float, float] = (0.35, 0.25, 0.20, 0.20),
+        bias: float = 0.0,
+        temperature: float = 1.0,
+        epsilon: float = 1e-6,
+    ):
+        self.weights = [float(w) for w in weights]
+        self.bias = float(bias)
+        self.temperature = max(1e-4, float(temperature))
+        self.epsilon = float(epsilon)
+
+    def estimate(
+        self,
+        stability: float,
+        brightness: float,
+        tracking: float,
+        consistency: float,
+    ) -> float:
+        s_stab = max(self.epsilon, float(stability))
+        s_bright = max(self.epsilon, float(brightness))
+        s_track = max(self.epsilon, float(tracking))
+        s_consist = max(self.epsilon, float(consistency))
+
+        # Log-space feature transformation
+        log_stab = math.log(s_stab)
+        log_bright = math.log(s_bright)
+        log_track = math.log(s_track)
+        log_consist = math.log(s_consist)
+
+        logit = (
+            self.weights[0] * log_stab
+            + self.weights[1] * log_bright
+            + self.weights[2] * log_track
+            + self.weights[3] * log_consist
+            + self.bias
+        ) / self.temperature
+
+        if self.bias == 0.0 and self.temperature == 1.0:
+            # Analytical equivalence to geometric mean
+            return max(0.0, min(1.0, math.exp(logit)))
+        else:
+            # Calibrated Logistic Sigmoid
+            try:
+                return float(1.0 / (1.0 + math.exp(-logit)))
+            except OverflowError:
+                return 0.0 if logit < 0 else 1.0
 
 
 # ═══════════════════════════════════════════════════════════════════════
@@ -112,13 +182,14 @@ class RobustnessGuard:
         2. Score frame brightness (too dark / too bright → penalty).
         3. Score tracking confidence (direct from MediaPipe).
         4. Score cue consistency (variance of fusion confidences).
-        5. Combine sub-scores into system_reliability.
+        5. Evaluate heuristic vs learned reliability.
         6. EMA-smooth the reliability to prevent flicker.
         7. Recommend alert suppression if reliability is very low.
     """
 
     def __init__(self, cfg: SystemConfig):
         rc = cfg.robustness
+        self._cfg = cfg
 
         # Landmark stability parameters
         self._jitter_low = rc.jitter_low_threshold
@@ -138,12 +209,18 @@ class RobustnessGuard:
         # Reliability EMA
         self._ema_alpha = rc.reliability_ema_alpha
         self._smoothed_reliability = 1.0
-
-        # Suppression threshold
         self._suppress_thresh = rc.alert_suppression_threshold
 
         # Frames-without-face counter (for consistency scoring)
         self._consecutive_no_face = 0
+
+        # Phase 2.5: Learned Estimator Instance
+        self.learned_estimator = LearnedReliabilityEstimator(
+            weights=rc.learned_weights,
+            bias=rc.learned_bias,
+            temperature=rc.temperature,
+        )
+        self._estimator_mode = rc.reliability_estimator_mode
 
     # ───────────────────────────────────────────────────────────────────
     # Public API
@@ -182,6 +259,9 @@ class RobustnessGuard:
                 tracking_quality=0.0,
                 cue_consistency=0.5,
                 system_reliability=self._smoothed_reliability,
+                heuristic_reliability=self._smoothed_reliability,
+                learned_reliability=self._smoothed_reliability,
+                estimator_mode=self._estimator_mode,
                 landmark_jitter=sq.landmark_jitter,
                 frame_brightness=sq.frame_brightness,
                 alert_suppressed=self._smoothed_reliability < self._suppress_thresh,
@@ -202,19 +282,31 @@ class RobustnessGuard:
         consistency = self._score_cue_consistency(ear_conf, mar_conf, pose_conf)
 
         # ── Step 5: Combine sub-scores ──────────────────────────────
-        # Weighted geometric mean — a single bad channel dominates.
-        # Weights: stability=0.35, brightness=0.25, tracking=0.20, consistency=0.20
-        raw_reliability = (
+        # Classical Heuristic Geometric Mean
+        heuristic_reliability = (
             (stability ** 0.35)
             * (brightness ** 0.25)
             * (tracking ** 0.20)
             * (consistency ** 0.20)
         )
-        raw_reliability = max(0.0, min(1.0, raw_reliability))
+        heuristic_reliability = max(0.0, min(1.0, heuristic_reliability))
+
+        # Learned Estimator Score
+        learned_reliability = self.learned_estimator.estimate(
+            stability, brightness, tracking, consistency
+        )
+
+        # Select Mode
+        if self._estimator_mode == "learned_logistic":
+            target_reliability = learned_reliability
+        elif self._estimator_mode == "ensemble":
+            target_reliability = 0.5 * heuristic_reliability + 0.5 * learned_reliability
+        else:
+            target_reliability = heuristic_reliability
 
         # ── Step 6: EMA smooth ──────────────────────────────────────
         self._smoothed_reliability = (
-            self._ema_alpha * raw_reliability
+            self._ema_alpha * target_reliability
             + (1.0 - self._ema_alpha) * self._smoothed_reliability
         )
 
@@ -227,6 +319,9 @@ class RobustnessGuard:
             tracking_quality=tracking,
             cue_consistency=consistency,
             system_reliability=self._smoothed_reliability,
+            heuristic_reliability=heuristic_reliability,
+            learned_reliability=learned_reliability,
+            estimator_mode=self._estimator_mode,
             landmark_jitter=sq.landmark_jitter,
             frame_brightness=sq.frame_brightness,
             alert_suppressed=suppressed,

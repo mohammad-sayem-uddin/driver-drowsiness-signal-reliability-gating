@@ -172,6 +172,13 @@ class TestRobustnessGuard(unittest.TestCase):
             snap = self.guard.update(sq, ear_conf=0.5, mar_conf=0.5, pose_conf=0.5)
         self.assertLess(snap.system_reliability, 0.5)
 
+    def test_learned_reliability_equivalence(self):
+        from src.robustness import LearnedReliabilityEstimator
+        estimator = LearnedReliabilityEstimator(weights=(0.35, 0.25, 0.20, 0.20), bias=0.0, temperature=1.0)
+        score = estimator.estimate(stability=0.8, brightness=0.9, tracking=1.0, consistency=0.7)
+        expected_geom = (0.8 ** 0.35) * (0.9 ** 0.25) * (1.0 ** 0.20) * (0.7 ** 0.20)
+        self.assertAlmostEqual(score, expected_geom, places=4)
+
 
 class TestFatigueFusionEngine(unittest.TestCase):
     """Test multi-cue weighted fusion score and agreement multipliers."""

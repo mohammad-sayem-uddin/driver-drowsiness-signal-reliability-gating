@@ -15,6 +15,7 @@ Usage:
 """
 
 from dataclasses import dataclass, field
+from typing import Tuple, List, Optional
 
 
 # ═══════════════════════════════════════════════════════════════════════
@@ -311,6 +312,13 @@ class RobustnessConfig:
     consistency_window: int = 15
     reliability_ema_alpha: float = 0.2
     alert_suppression_threshold: float = 0.5
+
+    # --- Phase 2.5 Extensions: Learned Reliability Estimation Framework ---
+    # Estimation mode: "geometric" (classical heuristic), "learned_logistic" (calibrated logistic), or "ensemble"
+    reliability_estimator_mode: str = "geometric"
+    learned_weights: Tuple[float, float, float, float] = (0.35, 0.25, 0.20, 0.20)
+    learned_bias: float = 0.0
+    temperature: float = 1.0
 
 
 # ═══════════════════════════════════════════════════════════════════════
