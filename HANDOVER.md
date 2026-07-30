@@ -2,7 +2,7 @@
 
 **Project:** Real-Time Driver Drowsiness Detection via Signal Reliability Gating
 **Audience:** Thesis supervisor, external examiner, and the next research engineer
-**Status:** First full experiment cycle complete (EXP-000 … EXP-004) + independent audit — **EXPERIMENT CYCLE 1 COMPLETE**
+**Status:** First full experiment cycle complete (EXP-000 … EXP-004) + independent audit; EXP-005 event-level evaluation complete (audited ACCEPT) — **EXPERIMENT CYCLE 1 COMPLETE**
 **Date:** 2026-07-29
 **Target venues:** IEEE Intelligent Vehicles Symposium (IV) / IEEE ITSC (T-ITS as extension)
 
@@ -32,11 +32,13 @@ true-positive rate (TPR) without hurting detection of real drowsiness.
    sub-scores (landmark-stability, brightness-quality, cue-consistency)
    combined by a weighted **geometric mean** into a reliability index
    `r ∈ [0,1]`, which **multiplicatively attenuates fused fatigue evidence
-   before temporal accumulation**. It is **safety-asymmetric**: a SEVERE
-   fatigue state is never suppressed by the gate.
-2. **Variance-based speech-jitter MAR filter** — suppresses talking-induced
-   *yawn* false positives by gating on the temporal variance σ²(MAR) of the
-   mouth-aspect ratio.
+   before temporal accumulation**. The gate attenuates the fatigue **score**
+   for all states (`fatigue_fusion.py`, `raw_score *= reliability`,
+   unconditional); a separate **state-level** guard governs exit from SEVERE
+   (`state_manager.py`).
+2. **Speech-jitter MAR filter** — suppresses talking-induced *yawn* false
+   positives by gating on the **mean absolute per-frame change in MAR**
+   (mean |ΔMAR|, threshold 0.05) of the mouth-aspect ratio.
 
 Everything else (EAR/MAR geometry, head pose, PERCLOS, the 5-state hysteresis
 machine, the optional CNN eye-validator) is standard and serves the two
@@ -53,8 +55,8 @@ frame → FaceMesh → geometry (EAR, MAR 2D, head pose solvePnP)
       → SignalQuality (3 sub-scores)
       → RobustnessGuard → reliability r ∈ [0,1]
       → TemporalAnalyzer (speech-jitter filter; injectable clock)
-      → FatigueFusionEngine (weighted sum × agreement × r; SEVERE-exempt)
-      → StateManager (5-state hysteresis machine)
+      → FatigueFusionEngine (weighted sum × agreement × r; applied to all states)
+      → StateManager (5-state hysteresis machine; state-level SEVERE guard)
       → alert / UI
 ```
 
@@ -62,8 +64,8 @@ frame → FaceMesh → geometry (EAR, MAR 2D, head pose solvePnP)
 |---|---|---|
 | Detector | `src/detector.py` | EAR, MAR (2D image-plane only), calibration |
 | Pose | `src/pose_estimator.py` | head pose via `solvePnP` |
-| Robustness | `src/robustness.py` | 3-component reliability, geometric mean, SEVERE exemption |
-| Temporal | `src/temporal_analyzer.py` | monotonic/injected-clock durations, σ²(MAR) speech gate, PERCLOS |
+| Robustness | `src/robustness.py` | 3-component reliability, geometric mean |
+| Temporal | `src/temporal_analyzer.py` | monotonic/injected-clock durations, mean \|ΔMAR\| speech gate (threshold 0.05), PERCLOS |
 | Fusion | `src/fatigue_fusion.py` | weighted evidence × agreement × reliability |
 | State | `src/state_manager.py` | 5-state hysteresis machine, face-loss escalation |
 | CNN (ablation) | `src/cnn_validator.py` | optional selective eye validation — **OFF by default** |
@@ -109,9 +111,10 @@ no longer used — see the EXP-000 retraction (§6).
 
 - **Splitting:** Leave-One-Subject-Out (LOSO) / subject-disjoint GroupKFold.
   Every reported number is cross-subject. Seed = 42, deterministic.
-- **Primary metric:** FPR at matched TPR — the operating point is fixed on the
-  **V0 baseline** ROC (`target_tpr = 0.80`) and then held constant across all
-  variants.
+- **Primary metric:** FPR at matched TPR — the `target_tpr = 0.80` is set on the
+  **V0 baseline** ROC, and FPR is then read at each variant's **nearest
+  achievable TPR** to that target (realized TPRs 0.80 / 0.7989 / 0.8006 across
+  variants; see `evaluation/loso_harness.py`), not a single held TPR.
 - **Secondary metrics:** ROC-AUC (trapezoidal), FPR/hour.
 - **Feasibility:** per-stage latency, throughput (FPS), memory — to be
   *measured on-device* (Raspberry Pi 4) for the final paper claim.
@@ -152,8 +155,9 @@ the fixed-operating-point logic. It **does not persist** results unless run with
   refuses to run without measured JSON.
 - Integrity verifier (`evaluation/verify_integrity.py`) — **6/6 invariants
   pass**.
-- Test suite: **17/17 unit tests pass**, **3/3 smoke tests pass** (verified
-  2026-07-29).
+- Test suite: **17/17 unit tests pass**, **3/3 smoke tests pass**, and
+  **65/65 event-metric tests pass** (`tests/test_event_metrics.py`) — verified
+  2026-07-30.
 
 **Measured results to date** (each with an `EXP-###` row + committed artifact):
 - **EXP-001 — host latency:** mean **3.205 ms/frame** (p50 3.080, p95 3.316,
@@ -172,10 +176,15 @@ the fixed-operating-point logic. It **does not persist** results unless run with
   `should_alarm` boolean, never the swept `fatigue_score`. Independently
   re-audited (`reports/EXP-004_AUDIT/`).
 
+- **EXP-005 — V0–V4 event-level alarm evaluation on NTHU-DDD (66,521 frames):**
+  **DONE and audited ACCEPT** (`reports/EXP-005_REPORT.md`,
+  `reports/EXP-005_AUDIT.md`). Event recall **0.122** at **6.5–9.7 false
+  alarms/hour**; only **2 of 4 subjects** ever fire an alarm; all three
+  observability gates **G1/G2/G3 FAIL**. This confirms the EXP-004 negative at
+  the event level — the gate does not deliver the episode-level spurious-alarm
+  suppression the design targets.
+
 **Not yet done — the next phase (official roadmap, `EXPERIMENT_REGISTRY.md §4`):**
-- **EXP-005 — Event-Level Alarm Evaluation** (FPR/hour + episode latency over
-  V0–V4), where the CNN arm and the gate's spurious-alarm protection can be
-  observed.
 - **EXP-006 — Gate Redesign Evaluation** — re-architect the gate as an additive
   decision-layer term (the EXP-004 audit's recommended follow-up; the audit
   labels it "EXP-005", official ID is EXP-006).
@@ -211,7 +220,9 @@ the fixed-operating-point logic. It **does not persist** results unless run with
   AUC never above baseline). The scientific value is the *diagnosis* — the
   frame-level FPR@TPR metric, on NTHU's conservative clip-derived labels, cannot
   observe episode-level spurious-alarm behaviour (and V4≡V3 shows the CNN never
-  touches the swept score). This motivates the EXP-005 event-level re-evaluation.
+  touches the swept score). This motivated the EXP-005 event-level re-evaluation,
+  now complete: it confirms the negative at the event level (recall 0.122, 6.5–9.7
+  false alarms/hour, 2 of 4 subjects fire, G1/G2/G3 FAIL).
   Do not retune thresholds until the number turns positive — that would be the
   integrity failure this whole regime exists to prevent.
 - Lead the results with **FPR@matched-TPR** (the metric the design optimizes),
@@ -222,8 +233,9 @@ the fixed-operating-point logic. It **does not persist** results unless run with
   single collapsing component (e.g. brightness → 0) drives reliability toward 0,
   which is the intended "one bad signal poisons trust" behaviour, unlike an
   arithmetic mean.
-- The **SEVERE exemption** is a safety argument, not an accuracy trick — state
-  it as such.
+- The **state-level SEVERE guard** (in `state_manager.py`, governing exit from
+  the SEVERE state — distinct from the score-level gate, which attenuates
+  unconditionally) is a safety argument, not an accuracy trick — state it as such.
 - Latency: only the host number (3.205 ms) is real today. Do **not** write a Pi
   4 number until on-device profiling is logged.
 
@@ -243,10 +255,14 @@ reduce FPR at matched TPR and the speech-jitter filter worsens it. This is a
 legitimate scientific finding, not a blocker — and the EXP-004 audit explains
 *why* the frame-level protocol cannot see the mechanisms the design targets.
 
+**EXP-005** Event-Level Alarm Evaluation is now **complete and audited ACCEPT**;
+it confirms the frame-level negative at the event level (recall 0.122, 6.5–9.7
+false alarms/hour, 2 of 4 subjects fire, all three observability gates FAIL).
+
 **The project is EXPERIMENT-CYCLE-1 COMPLETE.** The next engineer should follow
-the **official roadmap** (`EXPERIMENT_REGISTRY.md §4`): **EXP-005** Event-Level
-Alarm Evaluation, then **EXP-006** Gate Redesign Evaluation, **EXP-007**
-Raspberry Pi Deployment Evaluation, and the optional **EXP-008** Second Dataset
-Validation — then paper population. Log every run as an `EXP-###` row before
-citing it. The earlier EXP-005 naming ambiguity is resolved by that roadmap and
-its reconciliation table.
+the **official roadmap** (`EXPERIMENT_REGISTRY.md §4`) from where EXP-005 leaves
+off: **EXP-006** Gate Redesign Evaluation, then **EXP-007** Raspberry Pi
+Deployment Evaluation, and the optional **EXP-008** Second Dataset Validation —
+then paper population. Log every run as an `EXP-###` row before citing it. The
+earlier EXP-005 naming ambiguity is resolved by that roadmap and its
+reconciliation table.

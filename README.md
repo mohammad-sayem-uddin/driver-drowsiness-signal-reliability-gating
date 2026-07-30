@@ -17,9 +17,11 @@ attenuates that evidence before it accumulates over time**.
 > FPR at matched TPR=0.80 (V2 0.624 vs V0 0.624, flat), the speech-jitter
 > filter *raises* FPR (V1/V3/V4 ≈0.669), and ROC-AUC never beats baseline
 > (V0 0.629 highest). See [EXP-004](reports/EXP-004_REPORT.md) and the
-> [audit](reports/EXP-004_AUDIT/). The next step (EXP-005) is an
-> **event-level alarm evaluation** where the CNN arm and the gate's
-> spurious-alarm protection can actually be observed.
+> [audit](reports/EXP-004_AUDIT/). EXP-005, the **event-level alarm
+> evaluation**, is now **complete** (66,521 frames, audited ACCEPT): it
+> confirms the negative — event recall 0.122 at 6.5–9.7 false alarms/hour,
+> only 2 of 4 subjects fire, and all three observability gates fail. See
+> [EXP-005](reports/EXP-005_REPORT.md) and its [audit](reports/EXP-005_AUDIT.md).
 >
 > Measured latency remains **host-only** (EXP-001: 3.205 ms/frame on a
 > Darwin-arm64 host — **NOT** a Raspberry Pi 4).
@@ -31,11 +33,12 @@ attenuates that evidence before it accumulates over time**.
 1. **Decomposed signal-reliability gate** — three interpretable sub-scores
    (landmark-stability, brightness-quality, cue-consistency) combined by a
    **weighted geometric mean** into a reliability index `r ∈ [0,1]`, weights
-   `(0.45, 0.30, 0.25)`. It is **safety-asymmetric**: a SEVERE fatigue state is
-   never suppressed by the gate.
-2. **Variance-based speech-jitter MAR filter** — suppresses talking-induced
-   *yawn* false positives by gating on the temporal variance σ²(MAR) of the
-   mouth-aspect ratio.
+   `(0.45, 0.30, 0.25)`. The gate attenuates the fatigue **score** for all
+   states (`fatigue_fusion.py`, `raw_score *= reliability`, unconditional); a
+   separate **state-level** guard governs exit from SEVERE (`state_manager.py`).
+2. **Speech-jitter MAR filter** — suppresses talking-induced
+   *yawn* false positives by gating on the **mean absolute per-frame change in
+   MAR** (mean |ΔMAR|, threshold 0.05) of the mouth-aspect ratio.
 
 ## Pipeline
 
@@ -44,8 +47,8 @@ frame → FaceMesh → geometry (EAR, MAR 2D, head pose solvePnP)
       → SignalQuality (3 sub-scores)
       → RobustnessGuard → reliability r ∈ [0,1]
       → TemporalAnalyzer (speech-jitter filter; injectable clock)
-      → FatigueFusionEngine (weighted sum × agreement × r; SEVERE-exempt)
-      → StateManager (5-state hysteresis machine)
+      → FatigueFusionEngine (weighted sum × agreement × r; applied to all states)
+      → StateManager (5-state hysteresis machine; state-level SEVERE guard)
       → alert / UI
 ```
 
@@ -60,7 +63,7 @@ and deployment cannot diverge.
 | `src/` | Detection pipeline (geometry, pose, robustness gate, temporal, fusion, state machine, frame processor, config, live app). |
 | `evaluation/` | LOSO harness, NTHU ground-truth mapping, latency benchmark, figure generator, integrity verifier. |
 | `tools/` | CNN trainer, subject-disjoint split generator, dataset integrity audit. |
-| `tests/` | 17 unit tests + 3 smoke tests. |
+| `tests/` | 17 unit tests + 3 smoke tests + 65 event-metric tests (`test_event_metrics.py`). |
 | `Data/` | NTHU-DDD, MRL Eye, YawDD (and the quarantined `drowsiness_detection`). |
 | `results/` | `measured_results.json` + canonical paper figures. |
 | `experiments/` | Per-experiment artifact folders (`EXP-002_*`, `EXP-003_*`, `EXP-004_*`): metrics JSON, CSVs, plots, logs. |
@@ -91,10 +94,12 @@ python3 tests/smoke_test.py                # 3/3 smoke tests
 
 ## Evaluation & experiment discipline
 
-The primary metric is **FPR at matched TPR**: the operating point is fixed on
-the **V0 baseline** ROC (`target_tpr = 0.80`) and held constant across the
-frozen ablation variants **V0–V4** (toggles: speech filter, reliability gate,
-CNN). Splitting is subject-disjoint **LOSO**, seed **42**.
+The primary metric is **FPR at matched TPR**: FPR is read at each variant's
+**nearest achievable TPR** to the `target_tpr = 0.80` set on the **V0 baseline**
+ROC (realized TPRs 0.80 / 0.7989 / 0.8006 across variants; see
+`evaluation/loso_harness.py`), for the frozen ablation variants **V0–V4**
+(toggles: speech filter, reliability gate, CNN). Splitting is subject-disjoint
+**LOSO**, seed **42**.
 
 **Hard rule:** no performance number is citable without an `EXP-###` row in
 `EXPERIMENT_REGISTRY.md` **and** a committed artifact in `results/` or
@@ -112,10 +117,11 @@ for the full ledger and [reports/](reports/) for the per-experiment reports):
 | EXP-003 | INT8 / FP16 quantization | INT8 25.55 KB, −0.026% F1 |
 | EXP-004 | LOSO ablation V0–V4 on NTHU-DDD | **Negative:** gate does not lower FPR@TPR; see report + audit |
 
-The next experiments follow the **official roadmap** in
-[EXPERIMENT_REGISTRY.md](EXPERIMENT_REGISTRY.md) §4: **EXP-005** Event-Level
-Alarm Evaluation, **EXP-006** Gate Redesign Evaluation, **EXP-007** Raspberry Pi
-Deployment Evaluation, and the optional **EXP-008** Second Dataset Validation.
+**EXP-005** Event-Level Alarm Evaluation is **complete** (see above). The
+remaining experiments follow the **official roadmap** in
+[EXPERIMENT_REGISTRY.md](EXPERIMENT_REGISTRY.md) §4: **EXP-006** Gate Redesign
+Evaluation, **EXP-007** Raspberry Pi Deployment Evaluation, and the optional
+**EXP-008** Second Dataset Validation.
 Every new run must land an `EXP-###` row + committed artifact before it is cited.
 
 ## Documentation (read in this order)
@@ -131,7 +137,8 @@ Every new run must land an `EXP-###` row + committed artifact before it is cited
 
 - Reliability gate = exactly **3** components, weighted geometric mean, weights
   `(0.45, 0.30, 0.25)`.
-- SEVERE states are never suppressed by the gate.
+- The gate attenuates the fatigue score for all states; a separate state-level
+  guard governs exit from SEVERE (`state_manager.py`).
 - Subject-disjoint LOSO everywhere; seed 42.
 - MAR stays 2D; CNN is ablation-only and OFF by default.
 - `drowsiness_detection` stays quarantined.

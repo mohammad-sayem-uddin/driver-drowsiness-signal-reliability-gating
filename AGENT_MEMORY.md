@@ -22,15 +22,17 @@
   *trustworthy* the fatigue evidence is each frame (lighting, landmark
   stability, cue agreement) and multiplicatively attenuates that evidence before
   accumulating it. Claim: lower FPR at matched TPR vs. plain weighted fusion.
-- **Second novelty:** variance-based σ²(MAR) speech-jitter filter (suppresses
-  talking-as-yawn false positives).
+- **Second novelty:** speech-jitter filter gating on the **mean absolute
+  per-frame change in MAR** (mean |ΔMAR|, threshold 0.05) to suppress
+  talking-as-yawn false positives.
 
-## Current milestone (as of 2026-07-29)
+## Current milestone (as of 2026-07-30)
 
-- **IMPLEMENTATION + FIRST EXPERIMENT CYCLE COMPLETE (EXP-000 … EXP-004).**
-  Pipeline, harness, CNN training, quantization, and the LOSO ablation have all
-  been run, measured, and logged. An independent scientific re-audit of EXP-004
-  is also complete (`reports/EXP-004_AUDIT/`).
+- **EXPERIMENT CYCLE 1 COMPLETE (EXP-000 … EXP-005).**
+  Pipeline, harness, CNN training, quantization, the LOSO ablation, and the
+  event-level alarm evaluation have all been run, measured, and logged.
+  Independent scientific re-audits of EXP-004 (`reports/EXP-004_AUDIT/`) and
+  EXP-005 (`reports/EXP-005_AUDIT.md`, audited ACCEPT) are also complete.
 - **Measured results that now exist** (all with `EXP-###` rows + artifacts):
   - **EXP-001** latency = **3.205 ms/frame, Darwin-arm64 host — NOT a Pi 4.**
   - **EXP-002** MicroEyeNet trained on subject-disjoint MRL: VAL acc 0.9402 /
@@ -43,8 +45,15 @@
     0.6241, flat), the speech filter *raises* FPR (V1/V3/V4 ≈0.669), and AUC
     never beats baseline (V0 0.629 highest). V4≡V3 byte-identical (CNN routes
     only to the alarm boolean, not `fatigue_score`).
-- **Still NOT measured:** any Raspberry Pi 4 number; event-/episode-level FPR.
-- Green: 6/6 integrity invariants, 17/17 unit tests, 3/3 smoke tests.
+  - **EXP-005** event-level alarm evaluation V0–V4 on NTHU-DDD: **NEGATIVE
+    confirmed at the event level** (audited ACCEPT). Event recall **0.122**
+    (V0 0.146) at **6.5–9.7 false alarms/hour**; only **2 of 4 subjects** ever
+    fire an alarm (all FPs from subject 005); all three observability gates
+    **G1/G2/G3 FAIL** (0-frame diff). The gate does not deliver the
+    episode-level spurious-alarm suppression the design targets.
+- **Still NOT measured:** any Raspberry Pi 4 number.
+- Green: 6/6 integrity invariants, 17/17 unit tests, 3/3 smoke tests,
+  65/65 event-metric tests.
 
 ## Frozen decisions (do NOT change)
 
@@ -52,10 +61,13 @@
    brightness_quality, cue_consistency), **weighted geometric mean**, weights
    **(0.45, 0.30, 0.25)**. No 4th component (a phantom `tracking_confidence`/
    `tracking_quality` was removed and is now banned by CI).
-2. **SEVERE** fatigue states are **never** suppressed by the gate (safety).
+2. The score-level gate attenuates the fatigue score **unconditionally** for all
+   states (`fatigue_fusion.py`); a **separate state-level guard**
+   (`state_manager.py`) governs **exit from the SEVERE state** (safety).
 3. **Subject-disjoint LOSO** everywhere; **seed 42**.
 4. Offline timing uses the **video clock** (`frame_index/fps`), not wall-clock.
-5. **MAR stays 2D** (mouth idx `[78,13,308,14]`); EAR as implemented.
+5. **EAR and MAR are both 2D** (image-plane landmark coordinates; mouth idx
+   `[78,13,308,14]`).
 6. **CNN is ablation-only, OFF by default.**
 7. `drowsiness_detection` dataset is **quarantined** (loader raises).
 8. Ablation variants **V0–V4 are frozen** (toggles: speech_filter,
@@ -75,9 +87,11 @@
 
 ## Known findings / limitations (current)
 
-- **The primary hypothesis did not hold at frame level (EXP-004).** The gate
-  does not reduce frame-level FPR@matched-TPR; the speech filter worsens it.
-  Treat this as the honest starting point for EXP-005, not something to "fix" by
+- **The primary hypothesis did not hold — at frame level (EXP-004) and at event
+  level (EXP-005).** The gate does not reduce frame-level FPR@matched-TPR; the
+  speech filter worsens it; and the follow-up event-level evaluation confirmed
+  the negative (recall 0.122, 6.5–9.7 FA/hr, 2 of 4 subjects, G1/G2/G3 FAIL).
+  Treat this as the honest baseline for EXP-006, not something to "fix" by
   retuning until the number improves.
 - **No Raspberry Pi 4 numbers exist.** Do not invent them. The 3.205 ms is host.
 - **V4 ≡ V3 (byte-identical) is structural, not a bug.** The CNN verdict feeds
@@ -98,18 +112,20 @@
 
 ## Pending tasks (the next phase, official roadmap — `EXPERIMENT_REGISTRY.md §4`)
 
-1. **EXP-005 — Event-Level Alarm Evaluation.** Move from frame-level
-   `fatigue_score` ROC to an alarm-event metric (FPR/hour + episode latency)
-   over V0–V4, where the CNN arm and the gate's spurious-alarm protection can
-   actually be observed. Log as `EXP-005`.
-2. **EXP-006 — Gate Redesign Evaluation.** Re-architect the gate as an additive
+> **EXP-005 (Event-Level Alarm Evaluation) is DONE — audited ACCEPT.** It moved
+> from the frame-level `fatigue_score` ROC to an alarm-event metric (event
+> recall + FPR/hour) over V0–V4 and confirmed the EXP-004 negative at the event
+> level (see the milestone section above and `EXPERIMENT_REGISTRY.md §2/§3`).
+> The next open experiment is EXP-006.
+
+1. **EXP-006 — Gate Redesign Evaluation.** Re-architect the gate as an additive
    decision-layer term (the EXP-004 audit's recommended follow-up; the audit
    calls it "EXP-005", official ID is `EXP-006`). Log as `EXP-006`.
-3. **EXP-007 — Raspberry Pi Deployment Evaluation.** Profile on a real Raspberry
+2. **EXP-007 — Raspberry Pi Deployment Evaluation.** Profile on a real Raspberry
    Pi 4 (per-stage latency/memory/thermal); log as `EXP-007`.
-4. **EXP-008 — Second Dataset Validation (optional).** Reproduce on another
+3. **EXP-008 — Second Dataset Validation (optional).** Reproduce on another
    subject-disjoint dataset; log as `EXP-008`.
-5. Populate `paper/main.tex` results ONLY from committed artifacts
+4. Populate `paper/main.tex` results ONLY from committed artifacts
    (`results/measured_results.json` + `experiments/EXP-00X_*/`); regenerate
    figures with `evaluation/plot_paper_figures.py`. State EXP-004 honestly.
    (Writing task — no `EXP-###` of its own.)
@@ -163,7 +179,8 @@
 
 ## Common mistakes (do not repeat)
 
-- ❌ Adding a 4th reliability component. ❌ Arithmetic mean. ❌ Suppressing SEVERE.
+- ❌ Adding a 4th reliability component. ❌ Arithmetic mean. ❌ Removing the
+  state-level guard on SEVERE exit (the score-level gate itself is unconditional).
 - ❌ Writing a Pi 4 latency number. ❌ Random (subject-mixing) split.
-- ❌ Loading `drowsiness_detection`. ❌ Making MAR 3D.
+- ❌ Loading `drowsiness_detection`. ❌ Making EAR or MAR 3D.
 - ❌ Any paper/report number without an `EXP-###` row + committed artifact.

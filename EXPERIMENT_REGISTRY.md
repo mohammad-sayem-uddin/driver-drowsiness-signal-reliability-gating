@@ -34,6 +34,7 @@ Every neural network training run, ablation experiment, and benchmark evaluation
 | **EXP-002** | 2026-07-28 | MRL subject-disjoint (train 70,551 / val 4,970 / test 9,377) | MicroEyeNet (19,745 params) | 42 | 13 | 64 | Adam | 1e-3 | 0.9402 | 0.9262 | NOT MEASURED | NOT MEASURED | First trained MicroEyeNet baseline. VAL acc 0.9402 / F1 0.9262 @0.5; TEST acc 0.9362 / F1 0.9623 @0.5. Early-stopped at epoch 13 (best epoch 8). TFLite export = EXP-003 scope; no on-device latency measured. |
 | **EXP-003** | 2026-07-28 | MRL subject-disjoint TEST split (9,377 samples) | MicroEyeNet (19,745 params) Float16 & INT8 TFLite | 42 | N/A | N/A | N/A | N/A | N/A | 0.9623 (FP16) / 0.9620 (INT8) | FP16: 43.46 KB / INT8: 25.55 KB | NOT MEASURED (Pi 4 profile pending) | Quantization completed without retraining. Float16: 43.46 KB (1.87x comp, 0.0% F1 degradation). INT8: 25.55 KB (3.18x comp, -0.026% F1 degradation). Verification passed. |
 | **EXP-004** | 2026-07-28 | NTHU-DDD LOSO (subject-disjoint, 66,521 frames, 4 subjects) | Full pipeline ablation V0–V4 (heuristic; CNN = trained MicroEyeNet arm in V4) | 42 | N/A | N/A | N/A | N/A | N/A | 0.687 (V0) @ fixed op pt | N/A (no export) | N/A (accuracy exp) | First MEASURED accuracy/ROC. **Negative result:** reliability gate (V2) does not reduce FPR@matched-TPR=0.80 vs V0 (0.6244 vs 0.6241, flat); speech-filter variants (V1/V3/V4) raise FPR (0.669). ROC-AUC 0.613–0.629 (V0 highest). **V4 ≡ V3 byte-identical** — CNN verdict routes only to alarm-suppression boolean, not to the ROC's fatigue_score (frozen code). Frame-level labels ⇒ conservative FPR. |
+| **EXP-005** | 2026-07-30 | NTHU-DDD LOSO (subject-disjoint, 66,521 frames, 4 subjects, 0.6159 h) | Full pipeline ablation V0–V4 (event/alarm level) | 42 | N/A | N/A | N/A | N/A | N/A | N/A (event exp) | N/A (no export) | N/A (accuracy/event exp) | **Audited ACCEPT.** Event-level alarm evaluation confirming the EXP-004 negative at the event level. Event recall **0.122** (V1–V4; V0 0.146) at **6.5–9.7 false alarms/hour** (V3/V4 6.49, V0/V2 9.74); only **2 of 4 subjects** ever fire, and all FPs come from subject 005. Observability gates **G1/G2/G3 all FAIL** (0-frame diff — harness cannot observe CNN/gate effect). See `reports/EXP-005_REPORT.md`, `reports/EXP-005_AUDIT.md`, `experiments/EXP-005_events/`. |
 
 ---
 
@@ -220,6 +221,57 @@ Every neural network training run, ablation experiment, and benchmark evaluation
 
 ---
 
+### EXP-005: Event-Level Alarm Evaluation on NTHU-DDD (V0–V4)
+- **Date**: July 30, 2026
+- **Status**: Completed (measured, logged artifacts). Independently audited —
+  verdict **ACCEPT** (`reports/EXP-005_AUDIT.md`).
+- **Objective**: Re-evaluate the same five frozen variants (V0–V4) at the
+  **event / alarm level** rather than the frame level, to test whether the
+  speech filter, reliability gate, and CNN arm change the system's alarm
+  behaviour — the episode-level effect that the EXP-004 frame-level ROC is
+  structurally blind to (both the CNN verdict and the gate act on
+  `should_alarm`, not on the swept `fatigue_score`).
+- **Setup**: Event-level harness over NTHU-DDD, LOSO, seed 42, video clock
+  30 fps, sklearn absent (hand-rolled numpy metrics). Same 66,521 frames / 4
+  subjects (001/002/005/006), 0.615935 h of recording. Variants
+  `(speech_filter, reliability_gate, cnn)`: V0(F,F,F), V1(T,F,F), V2(F,T,F),
+  V3(T,T,F), V4(T,T,T). Observable unit = an alarm firing/being suppressed;
+  metrics = FA/hour (total and alert-normalized), event recall/precision/
+  miss-rate/F1, alarm latency. Wall clock 46.5 min (2790.88 s).
+- **Measured OVERALL (primary regime, from `per_variant_event_metrics.csv`)** —
+  TP / FP / FN / recall / precision / FA-per-hour(total):
+  - V0 V0_baseline: 6 / 6 / 35 / **0.146341** / 0.500000 / **9.741285**.
+  - V1 V1_speech_filter: 5 / 5 / 36 / **0.121951** / 0.500000 / 8.117737.
+  - V2 V2_reliability_gate: 5 / 6 / 36 / **0.121951** / 0.454545 / **9.741285**.
+  - V3 V3_full: 5 / 4 / 36 / **0.121951** / 0.555556 / **6.494190**.
+  - V4 V4_full_cnn: 5 / 4 / 36 / **0.121951** / 0.555556 / **6.494190**
+    (identical to V3 in the primary regime).
+- **Outcome — NEGATIVE, confirming EXP-004 at the event level.** Event recall is
+  uniformly low (0.122; V0 marginally higher at 0.146) and only **2 of the 4
+  subjects** ever fire an alarm. The reliability gate on its own (V2) does **not**
+  reduce false alarms — FA/hour stays at V0's 9.741 — and any FA reduction to
+  ≈6.5/hour (V3/V4) is carried by the speech-filter path, not the gate. All
+  false alarms originate from a **single subject (005)**.
+- **Observability gates G1/G2/G3 — ALL FAIL.** The run log's gates G1 (CNN
+  observable), G2 (gate observable), and G3 each report a 0-frame diff: under
+  this protocol the harness still cannot observe the CNN or gate effect on the
+  swept quantity, so the design's targeted episode-level spurious-alarm
+  suppression is not demonstrated.
+- **Caveats / NOT claimed**: NTHU labels remain clip-condition-derived. A
+  secondary regime and a minimum-duration (k) sensitivity sweep are reported in
+  `reports/EXP-005_REPORT.md` for completeness; they do not change the headline.
+  No TFLite export and no on-device/Pi 4 latency here.
+- **Artifacts**: `experiments/EXP-005_events/` (exp005_event_metrics.json,
+  per_variant_event_metrics.csv, per_subject_event_metrics.csv, episodes/,
+  event_streams/, plots/, exp005_run.log), `reports/EXP-005_REPORT.md`,
+  `reports/EXP-005_AUDIT.md`.
+- **Scientific Takeaway**: The event-level re-evaluation confirms the EXP-004
+  negative: under the current design the reliability gate does not deliver the
+  episode-level spurious-alarm suppression it targets. This closes experiment
+  cycle 1 and motivates the gate redesign (EXP-006).
+
+---
+
 ## 4. Planned / Next Experiments — Official Roadmap
 
 > The authoritative numbering is Section 2 above: **EXP-000 … EXP-004 are done
@@ -231,20 +283,20 @@ Every neural network training run, ablation experiment, and benchmark evaluation
 
 | Official ID | Title | Status |
 |:---|:---|:---|
-| **EXP-005** | Event-Level Alarm Evaluation | Planned (next) |
-| **EXP-006** | Gate Redesign Evaluation | Planned |
+| **EXP-005** | Event-Level Alarm Evaluation | **DONE — audited ACCEPT (see §2/§3)** |
+| **EXP-006** | Gate Redesign Evaluation | Planned (next) |
 | **EXP-007** | Raspberry Pi Deployment Evaluation | Planned |
 | **EXP-008** | Second Dataset Validation (Optional) | Planned (optional) |
 
-- **EXP-005 — Event-Level Alarm Evaluation (next).** Motivated directly by the
-  EXP-004 negative result. Replace the frame-level `fatigue_score` ROC with an
-  **alarm-event metric** (FPR/hour + episode-detection latency) evaluated over
-  the same V0–V4 variants on NTHU-DDD (and, where applicable, YawDD). Rationale:
-  EXP-004 showed V4≡V3 at frame level because the CNN verdict routes only to the
-  `should_alarm` boolean (not to `fatigue_score`), and the gate's protection
-  against spurious alarms is an event-level, not a frame-level, effect. An
-  event-level protocol is where V4≠V3 and any gate benefit could become
-  observable.
+- **EXP-005 — Event-Level Alarm Evaluation (DONE).** Completed 2026-07-30 and
+  independently audited (ACCEPT); see the Section 2 row and Section 3 detailed
+  log. Motivated directly by the EXP-004 negative result, it replaced the
+  frame-level `fatigue_score` ROC with an **alarm-event metric** (FA/hour +
+  episode-detection latency) over the same V0–V4 variants on NTHU-DDD. Outcome:
+  it **confirms the EXP-004 negative at the event level** — event recall 0.122,
+  6.5–9.7 FA/hour, only 2 of 4 subjects fire, and observability gates G1/G2/G3
+  all FAIL, so the gate's targeted episode-level spurious-alarm suppression is
+  not demonstrated under the current design.
 - **EXP-006 — Gate Redesign Evaluation.** Re-architect the reliability gate as an
   **additive decision-layer term** rather than a multiplicative pre-accumulation
   attenuator, and re-evaluate against V0. This is the follow-up the EXP-004

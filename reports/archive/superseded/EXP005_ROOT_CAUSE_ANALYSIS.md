@@ -1,3 +1,11 @@
+> ⚠️ **SUPERSEDED (2026-07-30).** This document describes an *early, superseded*
+> EXP-005 run (10,800 frames, recall 0.0). It does **not** reflect the final,
+> audited EXP-005 result. The authoritative EXP-005 record is
+> [`reports/EXP-005_REPORT.md`](../../EXP-005_REPORT.md) with audit
+> [`reports/EXP-005_AUDIT.md`](../../EXP-005_AUDIT.md) (66,521 frames, recall
+> 0.122, verdict ACCEPT). Retained for provenance only — **do not cite**.
+> Directed by `PUBLICATION_RECOVERY_PLAN.md` item C7.
+
 # EXP-005 Root Cause Analysis — Event-Level Alarm Evaluation
 
 **Scope:** Root-cause investigation only. No implementation was modified, no

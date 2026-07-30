@@ -31,8 +31,9 @@ the repository reached its current state and *why*.
 - 📄 `reports/archive/planning/PHASE_01_REPOSITORY_STABILIZATION.md`
   (archived 2026-07-29) — repository stabilized, baseline v1.0.
 - 🟢 Research contribution settled: **signal-reliability gating** (evidence
-  trust), not a new classifier. Second novelty: variance-based speech-jitter
-  MAR filter.
+  trust), not a new classifier. Second novelty: a speech-jitter MAR filter
+  gating on the mean absolute per-frame change in MAR (mean |ΔMAR|,
+  threshold 0.05).
 
 ## Phase 2 — Research data foundation & benchmark infrastructure
 
@@ -274,14 +275,35 @@ exists. Corrections:
 
 ---
 
+## EXP-005 — Event-Level Alarm Evaluation complete (audited ACCEPT) — 2026-07-30
+
+- 🧪 Ran the event-level alarm evaluation of the frozen variants V0–V4 on
+  NTHU-DDD (the EXP-004 follow-up motivated by the frame-level negative),
+  moving from the frame-level `fatigue_score` ROC to an alarm-event metric
+  (event recall + false alarms/hour). Artifacts under
+  `experiments/EXP-005_events/`; report `reports/EXP-005_REPORT.md`.
+- 📊 **Negative confirmed at the event level.** Event recall **0.122**
+  (V0 0.146) at **6.5–9.7 false alarms/hour**; only **2 of 4 subjects** ever
+  fire an alarm (all false alarms from subject 005); all three observability
+  gates **G1/G2/G3 FAIL** (0-frame diff between variants). The gate does not
+  deliver the episode-level spurious-alarm suppression the design targets.
+- 🔍 Independently re-audited — outcome **ACCEPT** (`reports/EXP-005_AUDIT.md`).
+- 📄 Logged to `EXPERIMENT_REGISTRY.md` §2 (master row) and §3 (detailed entry);
+  reconciled `README.md`, `HANDOVER.md`, `AGENT_MEMORY.md`, and `paper/main.tex`
+  to reflect EXP-005 as complete. **Experiment cycle 1 is now complete
+  (EXP-000 … EXP-005).**
+- ⚠️ **No scientific conclusion, algorithm, or measured number was altered** to
+  make this outcome look better — the negative result stands as measured.
+
+---
+
 
 
 ## Open items (next phase — official roadmap, `EXPERIMENT_REGISTRY.md §4`)
 
-- 🧪 **EXP-005 — Event-Level Alarm Evaluation** (motivated by EXP-004): replace
-  the frame-level fatigue-score ROC with an alarm-event metric (FPR/hour +
-  episode detection latency) so the CNN alarm-suppression arm (V4≠V3 possible)
-  and the gate's protection against spurious alarms become observable.
+> **EXP-005 (Event-Level Alarm Evaluation) is DONE — audited ACCEPT** (see the
+> 2026-07-30 entry above). The next open experiment is EXP-006.
+
 - 🧪 **EXP-006 — Gate Redesign Evaluation**: re-architect the gate as an additive
   decision-layer term (the EXP-004 audit's recommended follow-up — the audit
   labels it "EXP-005"; official ID is EXP-006).
