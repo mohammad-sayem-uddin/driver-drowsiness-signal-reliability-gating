@@ -28,45 +28,33 @@ class DrowsinessDetector:
     """
     Stateless math processor for EAR and MAR computation.
 
-    This class performs pure geometric calculations on facial landmark
-    coordinates.  It does not track state, count frames, or make
-    drowsiness decisions — those responsibilities belong to
-    TemporalAnalyzer and StateManager.
+    Performs pure 2D geometric calculations on facial landmark
+    coordinates. Standardizing to 2D Planar Euclidean geometry across both EAR
+    and MAR eliminates metric divergence caused by MediaPipe's uncalibrated z-depth.
     """
 
     @staticmethod
     def calculate_distance(p1, p2):
         """
-        Computes Euclidean distance between two points.
+        Computes 2D Planar Euclidean distance between two points.
 
-        Supports two input formats:
-          - MediaPipe landmark objects (have .x, .y, .z attributes)
-            → uses 3D Euclidean distance for curvature compensation
-          - Plain tuples (x, y) → uses 2D Euclidean distance
-
-        Using 3D coordinates (including MediaPipe's z-depth) provides
-        ~2% improvement in EAR accuracy for frontal faces.
+        Using 2D planar coordinates for both EAR and MAR provides higher
+        stability and eliminates pitch/yaw dependent ratio distortion caused by
+        MediaPipe's uncalibrated relative z-depth estimate.
 
         Args:
             p1, p2: Points as MediaPipe landmarks or (x, y) tuples.
 
         Returns:
-            float: Euclidean distance between the two points.
+            float: 2D Euclidean distance.
         """
         if hasattr(p1, 'x'):
-            return math.sqrt(
-                (p1.x - p2.x) ** 2 +
-                (p1.y - p2.y) ** 2 +
-                (p1.z - p2.z) ** 2
-            )
-        return math.sqrt(
-            (p1[0] - p2[0]) ** 2 +
-            (p1[1] - p2[1]) ** 2
-        )
+            return math.sqrt((p1.x - p2.x) ** 2 + (p1.y - p2.y) ** 2)
+        return math.sqrt((p1[0] - p2[0]) ** 2 + (p1[1] - p2[1]) ** 2)
 
     def calculate_ear(self, eye_landmarks):
         """
-        Calculates the Eye Aspect Ratio (EAR) from 6 landmark points.
+        Calculates the Eye Aspect Ratio (EAR) from 6 landmark points (2D Planar).
 
         Point layout:
                   P2          P3
@@ -87,7 +75,7 @@ class DrowsinessDetector:
         if len(eye_landmarks) < 6:
             return 0.0
 
-        # Vertical distances (upper lid ↔ lower lid)
+        # Vertical distances (upper lid ↔ lower lid) using 2D geometry
         v1 = self.calculate_distance(eye_landmarks[1], eye_landmarks[5])
         v2 = self.calculate_distance(eye_landmarks[2], eye_landmarks[4])
 
@@ -102,39 +90,18 @@ class DrowsinessDetector:
     @staticmethod
     def _distance_2d(p1, p2):
         """
-        Computes 2D Euclidean distance, ignoring the z-coordinate.
-
-        MediaPipe's z-coordinate is a *relative depth estimate* that is
-        NOT calibrated to the same scale as the normalized x/y coordinates.
-        For inner lip landmarks, z diverges dramatically during mouth
-        opening (up to 10× the actual spatial separation), inflating
-        vertical distances and producing MAR values >2.0.
-
-        Using 2D-only keeps MAR bounded to the expected 0.0–1.0 range.
-
-        Args:
-            p1, p2: Points as MediaPipe landmarks (.x, .y) or (x, y) tuples.
-
-        Returns:
-            float: 2D Euclidean distance.
+        Computes 2D Euclidean distance. Standardized alias for calculate_distance.
         """
-        import math
         if hasattr(p1, 'x'):
             return math.sqrt((p1.x - p2.x) ** 2 + (p1.y - p2.y) ** 2)
         return math.sqrt((p1[0] - p2[0]) ** 2 + (p1[1] - p2[1]) ** 2)
 
     def calculate_mar(self, mouth_landmarks):
         """
-        Calculates Mouth Aspect Ratio (MAR) from 4 landmark points.
+        Calculates Mouth Aspect Ratio (MAR) from 4 landmark points (2D Planar).
 
-        Layout: [left_corner, top_lip, right_corner, bottom_lip]
+        Layout: [left_corner, top_inner_lip, right_corner, bottom_inner_lip]
         Formula: MAR = ||top - bottom||₂ᴅ / ||left - right||₂ᴅ
-
-        IMPORTANT: Uses 2D-only distances (ignoring z-depth).
-        MediaPipe's z-coordinate is uncalibrated for lip landmarks and
-        causes MAR inflation >2.0 when using 3D Euclidean distance.
-        The EAR formula retains 3D because eye landmark z-depth is
-        relatively stable; lip z-depth is not.
 
         Args:
             mouth_landmarks (list): 4 points ordered as:
@@ -154,3 +121,55 @@ class DrowsinessDetector:
             return 0.0
 
         return v / h
+
+
+class CalibrationManager:
+    """
+    Dynamic Subject Baseline Normalization Engine.
+
+    Collects initial neutral frame metrics to establish subject-specific
+    baselines (EAR_base, MAR_base), eliminating subject-dependent geometric bias.
+    """
+
+    def __init__(self, target_samples: int = 90):
+        self.target_samples = target_samples
+        self.ear_samples = []
+        self.mar_samples = []
+        self.is_calibrated = False
+        self.ear_baseline = 0.30
+        self.mar_baseline = 0.15
+
+    def add_sample(self, ear: float, mar: float) -> bool:
+        """
+        Adds a neutral frame sample to calibration buffer.
+
+        Returns True when calibration becomes complete.
+        """
+        if self.is_calibrated:
+            return True
+
+        if ear > 0.0:
+            self.ear_samples.append(ear)
+        if mar > 0.0:
+            self.mar_samples.append(mar)
+
+        if len(self.ear_samples) >= self.target_samples:
+            self.ear_baseline = max(0.15, float(sum(self.ear_samples) / len(self.ear_samples)))
+            self.mar_baseline = max(0.05, float(sum(self.mar_samples) / len(self.mar_samples)))
+            self.is_calibrated = True
+            return True
+
+        return False
+
+    def normalize_ear(self, ear: float) -> float:
+        """Normalizes EAR relative to calibrated subject baseline."""
+        if not self.is_calibrated or self.ear_baseline == 0:
+            return ear
+        return ear / self.ear_baseline
+
+    def normalize_mar(self, mar: float) -> float:
+        """Normalizes MAR relative to calibrated subject baseline."""
+        if not self.is_calibrated or self.mar_baseline == 0:
+            return mar
+        return mar / self.mar_baseline
+

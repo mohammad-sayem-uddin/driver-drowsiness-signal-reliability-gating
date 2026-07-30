@@ -262,12 +262,19 @@ class RobustnessConfig:
     false-positive reduction through reliability-gated fusion.
 
     The RobustnessGuard computes a per-frame system_reliability (0–1)
-    from four sub-scores: landmark stability, frame brightness,
-    tracking confidence, and cue consistency.  This reliability score
-    multiplicatively attenuates the fusion engine's raw score, ensuring
-    degraded-signal conditions (low light, camera shake, occlusion)
-    automatically suppress false alarms without reducing sensitivity
-    under good conditions.
+    from three sub-scores: landmark stability, frame brightness, and
+    cue consistency.  This reliability score multiplicatively
+    attenuates the fusion engine's raw score, ensuring degraded-signal
+    conditions (low light, camera shake, occlusion) automatically
+    suppress false alarms without reducing sensitivity under good
+    conditions.
+
+    NOTE: A per-frame tracking-confidence sub-score was intentionally
+    removed.  MediaPipe FaceMesh does not expose a real per-frame
+    landmark ``visibility``/confidence value, so such a component would
+    have been a constant (~0.9), inflating the reliability index with a
+    phantom signal.  The three retained components are all genuinely
+    measured each frame.
 
     Attributes
     ----------
@@ -315,8 +322,11 @@ class RobustnessConfig:
 
     # --- Phase 2.5 Extensions: Learned Reliability Estimation Framework ---
     # Estimation mode: "geometric" (classical heuristic), "learned_logistic" (calibrated logistic), or "ensemble"
+    # Weights correspond to (landmark_stability, brightness, cue_consistency)
+    # and are renormalized to sum to 1.0 after dropping the phantom
+    # tracking component (freeze-report precondition 4).
     reliability_estimator_mode: str = "geometric"
-    learned_weights: Tuple[float, float, float, float] = (0.35, 0.25, 0.20, 0.20)
+    learned_weights: Tuple[float, float, float] = (0.45, 0.30, 0.25)
     learned_bias: float = 0.0
     temperature: float = 1.0
 
@@ -542,9 +552,45 @@ class OptimizationConfig:
     profiling_interval: int = 150
 
 
-# ═══════════════════════════════════════════════════════════════════════
-# Top-Level System Configuration
-# ═══════════════════════════════════════════════════════════════════════
+@dataclass
+class AblationConfig:
+    """
+    Ablation switches for the frozen experimental protocol (§3, variants V0–V4).
+
+    BOTH default to True, i.e. the full proposed system exactly as frozen — so
+    the live app and every non-ablation run are UNCHANGED. The LOSO/ablation
+    harness flips these to isolate each contribution:
+
+        V0 baseline          : both False  (weighted fusion only)
+        V1 + speech filter    : speech_filter_enabled=True,  gate off
+        V2 + reliability gate : gate on, speech off
+        V3 full               : both True   (== default frozen behavior)
+
+    These flags NEVER alter the research design; they only enable/disable an
+    already-frozen component so its individual effect can be measured. Turning
+    a component OFF must never make the system less safe than the baseline —
+    the SEVERE-never-suppressed invariant holds regardless.
+    """
+    # When False, the σ²(MAR) speech-jitter penalty in the yawn detector is
+    # bypassed (talking-induced MAR spikes are no longer down-weighted).
+    speech_filter_enabled: bool = True
+    # When False, the multiplicative reliability gate is bypassed (reliability
+    # is forced to 1.0 before fusion; SEVERE exemption is unaffected).
+    reliability_gate_enabled: bool = True
+
+
+@dataclass
+class DatasetPathsConfig:
+    """
+    Centralized Dataset Path Configuration.
+    Single source of truth for all dataset locations under Data/.
+    """
+    base_dir: str = "Data"
+    mrl_eye_path: str = "Data/mrl_eye"
+    drowsiness_detection_path: str = "Data/drowsiness_detection"
+    nthu_ddd_path: str = "Data/nthu_ddd"
+    yawdd_path: str = "Data/yawdd"
+
 
 @dataclass
 class SystemConfig:
@@ -568,6 +614,9 @@ class SystemConfig:
     face_mesh: FaceMeshConfig = field(default_factory=FaceMeshConfig)
     optimization: OptimizationConfig = field(default_factory=OptimizationConfig)
     cnn_validation: CNNValidationConfig = field(default_factory=CNNValidationConfig)
+    dataset_paths: DatasetPathsConfig = field(default_factory=DatasetPathsConfig)
+
+    ablation: AblationConfig = field(default_factory=AblationConfig)
 
     def __repr__(self):
         lines = [

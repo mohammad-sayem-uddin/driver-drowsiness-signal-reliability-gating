@@ -14,7 +14,7 @@ import math
 from unittest.mock import MagicMock
 
 from src.config import SystemConfig, DetectionConfig, FusionConfig, RobustnessConfig
-from src.detector import DrowsinessDetector
+from src.detector import DrowsinessDetector, CalibrationManager
 from src.temporal_analyzer import TemporalAnalyzer, EMASmoother, TemporalState
 from src.robustness import RobustnessGuard, SignalQuality, RobustnessSnapshot
 from src.fatigue_fusion import FatigueFusionEngine, FatigueSeverity, FusionSnapshot
@@ -61,11 +61,23 @@ class TestDrowsinessDetector(unittest.TestCase):
         dist = self.detector.calculate_distance(p1, p2)
         self.assertAlmostEqual(dist, 5.0, places=4)
 
-    def test_euclidean_distance_3d_landmark(self):
+    def test_euclidean_distance_landmark_2d_planar(self):
         p1 = DummyLandmark(0.0, 0.0, 0.0)
         p2 = DummyLandmark(1.0, 2.0, 2.0)
         dist = self.detector.calculate_distance(p1, p2)
-        self.assertAlmostEqual(dist, 3.0, places=4)
+        # Standardized 2D planar distance ignores z-depth noise: sqrt(1^2 + 2^2) = sqrt(5) ≈ 2.236068
+        self.assertAlmostEqual(dist, math.sqrt(5), places=4)
+
+    def test_calibration_manager(self):
+        calib = CalibrationManager(target_samples=3)
+        self.assertFalse(calib.is_calibrated)
+        calib.add_sample(0.30, 0.10)
+        calib.add_sample(0.30, 0.10)
+        calibrated = calib.add_sample(0.30, 0.10)
+        self.assertTrue(calibrated)
+        self.assertTrue(calib.is_calibrated)
+        self.assertAlmostEqual(calib.normalize_ear(0.30), 1.0, places=4)
+        self.assertAlmostEqual(calib.normalize_ear(0.15), 0.5, places=4)
 
     def test_ear_open_eye(self):
         # 6 landmark layout: [outer, upper_left, upper_right, inner, lower_right, lower_left]
@@ -153,7 +165,6 @@ class TestRobustnessGuard(unittest.TestCase):
         sq = SignalQuality(
             landmark_jitter=1.0,      # Perfect (<2.0px)
             frame_brightness=120.0,   # Ideal (60–200)
-            tracking_confidence=1.0,  # Max confidence
             face_visible=True
         )
         snap = self.guard.update(sq, ear_conf=0.0, mar_conf=0.0, pose_conf=0.0)
@@ -164,7 +175,6 @@ class TestRobustnessGuard(unittest.TestCase):
         sq = SignalQuality(
             landmark_jitter=10.0,     # High jitter
             frame_brightness=20.0,    # Very dark
-            tracking_confidence=0.3,
             face_visible=True
         )
         # Allow EMA (alpha=0.2) to converge over 15 frames
@@ -174,9 +184,9 @@ class TestRobustnessGuard(unittest.TestCase):
 
     def test_learned_reliability_equivalence(self):
         from src.robustness import LearnedReliabilityEstimator
-        estimator = LearnedReliabilityEstimator(weights=(0.35, 0.25, 0.20, 0.20), bias=0.0, temperature=1.0)
-        score = estimator.estimate(stability=0.8, brightness=0.9, tracking=1.0, consistency=0.7)
-        expected_geom = (0.8 ** 0.35) * (0.9 ** 0.25) * (1.0 ** 0.20) * (0.7 ** 0.20)
+        estimator = LearnedReliabilityEstimator(weights=(0.45, 0.30, 0.25), bias=0.0, temperature=1.0)
+        score = estimator.estimate(stability=0.8, brightness=0.9, consistency=0.7)
+        expected_geom = (0.8 ** 0.45) * (0.9 ** 0.30) * (0.7 ** 0.25)
         self.assertAlmostEqual(score, expected_geom, places=4)
 
 
@@ -232,11 +242,14 @@ class TestCNNValidatorFallback(unittest.TestCase):
         self.validator = CNNValidator(self.cfg)
 
     def test_missing_model_fallback(self):
-        # models/eye_state_model.tflite is missing
-        self.assertFalse(self.validator.is_available)
-        should_invoke = self.validator.should_invoke(smoothed_ear=0.20, system_reliability=1.0)
+        # Pass non-existent model path to test missing model fallback
+        cfg = SystemConfig()
+        cfg.cnn_validation.model_path = "models/non_existent_model.tflite"
+        validator = CNNValidator(cfg)
+        self.assertFalse(validator.is_available)
+        should_invoke = validator.should_invoke(smoothed_ear=0.20, system_reliability=1.0)
         self.assertFalse(should_invoke)
-        verdict = self.validator.validate_eye_state(eye_roi=None, smoothed_ear=0.20)
+        verdict = validator.validate_eye_state(eye_roi=None, smoothed_ear=0.20)
         self.assertFalse(verdict.invoked)
 
 

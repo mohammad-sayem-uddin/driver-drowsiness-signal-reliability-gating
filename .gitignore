@@ -36,6 +36,11 @@ models/*.tflite
 models/*.onnx
 models/*.pth
 !models/.gitkeep
+# Exception: EXP-003 quantization outputs are FINAL reproducibility evidence
+# (cited by reports/EXP-003_REPORT.md) and must be tracked.
+!models/eye_state_model.tflite
+!models/eye_state_model_fp16.tflite
+!models/eye_state_model_int8.tflite
 
 # Runtime logs & generated CSVs
 *.log

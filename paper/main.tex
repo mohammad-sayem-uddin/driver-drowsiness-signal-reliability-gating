@@ -1,0 +1,145 @@
+\documentclass[10pt,conference]{IEEEtran}
+\usepackage{cite}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{algorithmic}
+\usepackage{graphicx}
+\usepackage{textcomp}
+\usepackage{xcolor}
+
+\begin{document}
+
+\title{Real-Time Driver Drowsiness Detection via Adaptive Geometry and Signal Reliability Gating}
+
+\author{\IEEEauthorblockN{Sayemuddin}
+\IEEEauthorblockA{\textit{Department of Computer Science \& Engineering} \\
+\textit{Lead AI Research Engineer}\\
+Email: author@domain.com}
+}
+
+\maketitle
+
+\begin{abstract}
+Driver fatigue and drowsiness are leading contributors to global vehicular accidents. While facial landmark heuristics (e.g., Eye Aspect Ratio) provide high-speed non-invasive drowsiness detection, they suffer from false positives due to lighting fluctuations, camera shake, and individual biometric variations. Conversely, deep convolutional neural networks offer high classification accuracy but incur unacceptable computational overhead on resource-constrained embedded automotive hardware. In this paper, we present a lightweight, real-time driver drowsiness detection architecture whose central component is a \emph{decomposed signal-reliability gate} that multiplicatively attenuates multi-cue fatigue evidence by a continuous, component-wise signal-quality index before temporal accumulation, while guaranteeing that severe-fatigue alarms are never suppressed. A complementary variance-based speech-jitter filter suppresses mouth-motion false positives. We evaluate on public benchmarks (NTHU-DDD, YawDD) under leave-one-subject-out cross-validation, measuring false-positive rate at a matched detection rate. Under this strict subject-disjoint protocol we report an \emph{honest negative result} at the frame level: the reliability gate does not reduce the false-positive rate at a matched true-positive rate of $0.80$, and the speech-jitter filter increases it. We analyze why a frame-level operating-point metric on clip-derived labels cannot observe the gate's episode-level, spurious-alarm–suppression behaviour, and we establish real-time host feasibility ($3.205$~ms/frame on a laptop-class ARM CPU); on-device Raspberry~Pi~4 profiling remains future work.
+% RESULTS POLICY: every quantitative figure in this manuscript must trace to a
+% logged run in EXPERIMENT_REGISTRY.md and a committed artifact under results/
+% or experiments/. No Raspberry Pi 4 number exists yet; do not insert one.
+\end{abstract}
+
+\begin{IEEEkeywords}
+Driver Drowsiness Detection, Signal Reliability Gating, Eye Aspect Ratio, Embedded Vision, TensorFlow Lite, Edge Computing.
+\end{IEEEkeywords}
+
+\section{Introduction}
+Driver drowsiness detection systems (DDDS) are vital for intelligent transportation safety. Classical geometric approaches monitor facial landmark aspect ratios such as EAR and MAR. However, fixed thresholds fail across subject demographics and suffer under severe illumination degradation.
+
+To address these challenges, we propose:
+\begin{enumerate}
+    \item A \textbf{decomposed signal-reliability gate} that combines per-frame landmark-stability, brightness, and cue-consistency sub-scores into a continuous reliability index, and multiplicatively attenuates the fused fatigue evidence \emph{before} temporal accumulation --- while never suppressing severe-fatigue alarms.
+    \item A \textbf{variance-based speech-jitter filter} that suppresses mouth-motion (talking) false positives using the temporal variance of the mouth aspect ratio.
+    \item A \textbf{2D/3D metric separation} that computes the mouth aspect ratio in the image plane to avoid monocular depth inflation, reported as a supporting engineering result.
+\end{enumerate}
+An optional selective-CNN eye-validation arm (MicroEyeNet) is evaluated only as an ablation and is not claimed as a contribution, as selective CNN invocation is prior art.
+
+\section{Proposed Architecture}
+Our architecture consists of the following stages:
+\begin{itemize}
+    \item \textbf{Facial Landmark \& Geometry Processing}: MediaPipe FaceMesh landmarks; EAR from 3D eye geometry and MAR restricted to the 2D image plane to avoid monocular depth inflation.
+    \item \textbf{Head Pose Estimation}: pitch/yaw/roll via \texttt{solvePnP}.
+    \item \textbf{Signal-Reliability Estimation}: per-frame landmark-stability, brightness, and cue-consistency sub-scores combined into a continuous reliability index.
+    \item \textbf{Reliability-Gated Fusion}: multiplicative attenuation of fused fatigue evidence before temporal accumulation; severe states exempt from suppression.
+    \item \textbf{Asymmetric Temporal Integration \& Hysteresis State Machine}: wall-clock (monotonic) time-based integration, FPS-independent.
+    \item \textbf{Speech-Jitter Filter}: MAR-variance gating to suppress talking false positives.
+\end{itemize}
+
+\section{Experimental Results}
+% All figures below are backed by logged experiments (EXP-001..004) in
+% EXPERIMENT_REGISTRY.md and committed artifacts under experiments/ and
+% results/. Do not add numbers that lack an EXP-### row + artifact.
+All numbers reported here are drawn from logged experiments
+(\mbox{EXP-001}--\mbox{EXP-004}) with committed artifacts; no unmeasured value
+is cited.
+
+\subsection{Eye-state model (MicroEyeNet) and quantization}
+The optional MicroEyeNet eye-state validator ($19{,}745$ parameters) was trained
+on a genuinely subject-disjoint split of the MRL Eye dataset (\mbox{EXP-002};
+seed~42), reaching a test $F_1$ of $0.9623$. Post-training INT8 quantization
+(\mbox{EXP-003}) compresses the model to $25.55$~KB ($3.18\times$ smaller) with a
+$-0.026\%$ change in $F_1$, yielding a deployment-ready asset. The CNN arm is
+evaluated only as an ablation and is not claimed as a contribution.
+
+\subsection{Ablation on NTHU-DDD (leave-one-subject-out)}
+We evaluate five frozen variants under subject-disjoint LOSO on the full
+NTHU-DDD corpus ($66{,}521$ frames, $4$ subjects; \mbox{EXP-004}), toggling the
+speech-jitter filter, the reliability gate, and the CNN arm: V0 (baseline
+weighted fusion), V1 (\,$+$\,speech filter), V2 (\,$+$\,reliability gate), V3
+(full), and V4 (full\,$+$\,CNN). The operating point is fixed on the V0 ROC at a
+matched true-positive rate of $0.80$ and held constant across variants; the
+sweep variable is the continuous per-frame fatigue score.
+
+\begin{table}[t]
+\caption{Frame-level LOSO ablation on NTHU-DDD (EXP-004). FPR is reported at a
+matched TPR of $0.80$ fixed on the V0 baseline. Lower FPR and higher AUC are
+better.}
+\label{tab:ablation}
+\centering
+\begin{tabular}{lccc}
+\hline
+Variant & Gate / Filter / CNN & ROC-AUC & FPR@TPR$=0.80$ \\
+\hline
+V0 & --\,/\,--\,/\,-- & $0.6288$ & $0.6241$ \\
+V1 & --\,/\,\checkmark\,/\,-- & $0.6170$ & $0.6694$ \\
+V2 & \checkmark\,/\,--\,/\,-- & $0.6245$ & $0.6244$ \\
+V3 & \checkmark\,/\,\checkmark\,/\,-- & $0.6133$ & $0.6690$ \\
+V4 & \checkmark\,/\,\checkmark\,/\,\checkmark & $0.6133$ & $0.6690$ \\
+\hline
+\end{tabular}
+\end{table}
+
+Table~\ref{tab:ablation} reports an \textbf{honest negative result}. At the
+matched operating point, the reliability gate in isolation (V2) leaves the
+false-positive rate essentially unchanged relative to the baseline ($0.6244$ vs.
+$0.6241$), and every variant that adds the speech-jitter filter (V1, V3, V4)
+\emph{raises} the false-positive rate to $\approx 0.669$. ROC-AUC never exceeds
+the baseline (V0 highest at $0.6288$). The proposed mechanisms therefore do not
+improve frame-level discrimination under this protocol.
+
+Two structural observations explain the result and constrain its
+interpretation. First, V4 is byte-identical to V3: the CNN verdict is consumed
+only by the alarm-decision stage and never modifies the swept fatigue score, so
+it cannot move a frame-level ROC by construction. Second, NTHU-DDD labels are
+clip-condition derived, making the frame-level false-positive rate a
+conservative estimator: an open-eyed frame within a ``yawning'' clip is still
+labelled drowsy. The gate's intended benefit --- suppression of \emph{spurious
+alarm episodes} under unreliable measurement conditions --- and the CNN's
+alarm-suppression effect are episode-level phenomena that a frame-level
+operating-point metric cannot observe. Motivated by this analysis, event-level
+evaluation (false alarms per hour and per-episode latency) is the immediate next
+experiment.
+
+\subsection{Real-time feasibility}
+End-to-end per-frame latency was measured at $3.205$~ms (median $3.080$~ms, 95th
+percentile $3.316$~ms; $\approx 312$~FPS) over NTHU-DDD frames on a laptop-class
+ARM CPU (\mbox{EXP-001}). This establishes host feasibility only; \textbf{no
+Raspberry~Pi~4 measurement exists}, and no on-device latency is claimed.
+
+\section{Conclusion}
+We presented a signal-reliability-gated driver drowsiness detection
+architecture optimized for embedded deployment, and evaluated it under strict
+subject-disjoint leave-one-subject-out cross-validation. Our central empirical
+finding is a negative one: at the frame level, on clip-derived NTHU-DDD labels,
+the reliability gate does not reduce the false-positive rate at a matched
+detection rate, and the speech-jitter filter increases it. We showed this
+outcome is partly structural --- the CNN arm cannot influence the frame-level
+score, and clip-derived labels make frame-level false positives a conservative
+estimator --- and argued that the gate's intended benefit is an episode-level
+effect. Future work is therefore an event-level evaluation (false alarms per
+hour and per-episode latency), on-device Raspberry~Pi~4 profiling, and on-road
+validation.
+% Internal traceability (not for publication): the future work above maps to the
+% official experiment roadmap in EXPERIMENT_REGISTRY.md \S4 --- event-level
+% evaluation = EXP-005, gate redesign = EXP-006, Raspberry Pi deployment =
+% EXP-007, optional second-dataset validation = EXP-008. EXP-### are internal
+% registry IDs and deliberately do not appear in the manuscript body.
+
+\bibliographystyle{IEEEtran}
+\end{document}

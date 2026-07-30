@@ -1,0 +1,47 @@
+{
+  "exp_id": "EXP-003",
+  "best_checkpoint": "/Users/sayemuddin/Desktop/Driver Drowsiness/checkpoints/microeyenet_epoch08_valloss0.1793.keras",
+  "conversion_specs": {
+    "float16": {
+      "optimizations": [
+        "DEFAULT"
+      ],
+      "target_types": [
+        "float16"
+      ],
+      "output_path": "/Users/sayemuddin/Desktop/Driver Drowsiness/models/eye_state_model_fp16.tflite",
+      "file_size_bytes": 44500
+    },
+    "int8": {
+      "optimizations": [
+        "DEFAULT"
+      ],
+      "representative_dataset_samples": 500,
+      "supported_ops": [
+        "TFLITE_BUILTINS_INT8"
+      ],
+      "inference_input_type": "float32",
+      "inference_output_type": "float32",
+      "output_path": "/Users/sayemuddin/Desktop/Driver Drowsiness/models/eye_state_model_int8.tflite",
+      "file_size_bytes": 26160
+    }
+  },
+  "accuracy_degradation": {
+    "fp16_f1_diff": 0.0,
+    "int8_f1_diff": -0.00025539723687006965,
+    "fp16_acc_diff": 0.0,
+    "int8_acc_diff": -0.0005332195798228856
+  },
+  "size_reduction": {
+    "fp32_tflite_bytes": 83060,
+    "fp32_tflite_kb": 81.11328125,
+    "fp16_tflite_bytes": 44500,
+    "fp16_tflite_kb": 43.45703125,
+    "fp16_compression_ratio": 1.8665168539325843,
+    "fp16_size_reduction_pct": 46.4242716108837,
+    "int8_tflite_bytes": 26160,
+    "int8_tflite_kb": 25.546875,
+    "int8_compression_ratio": 3.1750764525993884,
+    "int8_size_reduction_pct": 68.50469540091501
+  }
+}

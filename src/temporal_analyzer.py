@@ -258,6 +258,10 @@ class YawnAnalyzer:
         self._yawn_duration = cfg.temporal.yawn_min_duration
         self._conf_threshold = cfg.yawn.confidence_threshold
         self._speech_jitter_limit = cfg.yawn.speech_jitter_threshold
+        # Ablation switch (frozen protocol §3). Default True == frozen behavior.
+        # When False, the σ²(MAR) speech-jitter penalty is bypassed so the
+        # V0/V2 baselines can be measured without the speech filter.
+        self._speech_filter_enabled = cfg.ablation.speech_filter_enabled
 
         # Smoother & Jitter Buffer
         self._smoother = EMASmoother(cfg.smoothing.mar_ema_alpha)
@@ -295,6 +299,9 @@ class YawnAnalyzer:
 
         # Detect speech (high jitter in the signal)
         self._is_speaking = mar_jitter > self._speech_jitter_limit
+        if not self._speech_filter_enabled:
+            # Ablation V0/V2: disable the speech-jitter contribution entirely.
+            self._is_speaking = False
 
         yawn_duration = 0.0
 
@@ -331,6 +338,9 @@ class YawnAnalyzer:
                 # 3. Smoothness factor (inverse of jitter)
                 jitter_penalty = min(mar_jitter / (self._speech_jitter_limit * 1.5), 1.0)
                 smoothness = 1.0 - jitter_penalty
+                if not self._speech_filter_enabled:
+                    # Ablation V0/V2: no variance-based penalty at all.
+                    smoothness = 1.0
 
                 # Combine: Need magnitude, duration, and smoothness.
                 self._yawn_confidence = (mag_factor * 0.2 + dur_factor * 0.5 + smoothness * 0.3)
@@ -514,18 +524,23 @@ class TemporalAnalyzer:
         self.yawn_analyzer = YawnAnalyzer(cfg)
         self.posture_analyzer = PostureAnalyzer(cfg)
 
-    def update(self, raw_ear: float, raw_mar: float, raw_pitch: float = 0.0, raw_yaw: float = 0.0, raw_roll: float = 0.0) -> TemporalState:
+    def update(self, raw_ear: float, raw_mar: float, raw_pitch: float = 0.0, raw_yaw: float = 0.0, raw_roll: float = 0.0, timestamp: float = None) -> TemporalState:
         """
         Process one frame of EAR and MAR data.
 
         Args:
             raw_ear: Raw average EAR (bilateral mean).
             raw_mar: Raw MAR value.
+            timestamp: Monotonic time for this frame. Defaults to
+                time.monotonic() for the live camera path. Offline video
+                evaluation MUST pass the video-clock time (frame_index / fps)
+                so temporal integration reflects the recording, not the
+                processing speed (frozen evaluation protocol).
 
         Returns:
             TemporalState snapshot for this frame.
         """
-        now = time.monotonic()
+        now = time.monotonic() if timestamp is None else timestamp
 
         # --- Eye analysis ---
         (

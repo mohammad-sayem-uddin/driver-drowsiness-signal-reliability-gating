@@ -1,0 +1,22 @@
+{
+  "latency_ms": {
+    "stages": [
+      "full_pipeline"
+    ],
+    "Darwin-arm64": [
+      3.2052
+    ]
+  },
+  "_provenance": {
+    "Darwin-arm64": {
+      "measured_on": "Darwin-arm64",
+      "n_frames": 300,
+      "mean_ms": 3.2052,
+      "p50_ms": 3.0804,
+      "p95_ms": 3.3164,
+      "max_ms": 29.2728,
+      "throughput_fps": 311.99,
+      "note": "Measured on this host, NOT a Raspberry Pi 4. Pi 4 numbers require on-device profiling (frozen protocol step 5)."
+    }
+  }
+}

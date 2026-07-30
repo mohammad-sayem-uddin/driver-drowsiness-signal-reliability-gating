@@ -241,7 +241,7 @@ class StateManager:
     def update(self, temporal_state: TemporalState, face_detected: bool,
                reliability: float = 1.0, alert_suppressed: bool = False,
                landmark_jitter: float = 0.0, frame_brightness: float = 128.0,
-               cnn_verdict: CNNVerdict = None) -> SystemState:
+               cnn_verdict: CNNVerdict = None, timestamp: float = None) -> SystemState:
         """
         Compute system state for this frame.
 
@@ -253,11 +253,15 @@ class StateManager:
                               suppressing non-severe alerts.
             landmark_jitter: Raw landmark jitter for HUD/logging.
             frame_brightness: Raw brightness for HUD/logging.
+            timestamp: Monotonic time for this frame. Defaults to
+                time.monotonic() (live path). Offline video evaluation MUST
+                pass the video-clock time so face-loss escalation timing
+                reflects the recording (frozen evaluation protocol).
 
         Returns:
             SystemState snapshot.
         """
-        now = time.monotonic()
+        now = time.monotonic() if timestamp is None else timestamp
 
         # --- Update face presence ---
         # Pass the drowsiness state *or* whether we were previously drowsy

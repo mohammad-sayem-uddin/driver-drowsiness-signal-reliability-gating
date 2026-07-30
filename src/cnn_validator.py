@@ -23,8 +23,10 @@ CNN Architecture (MicroEyeNet):
     Conv2D(8, 3×3, ReLU) → MaxPool(2×2)
     Conv2D(16, 3×3, ReLU) → MaxPool(2×2)
     Flatten → Dense(32, ReLU) → Dropout(0.3) → Dense(1, Sigmoid)
-    Total: ~9.5K parameters
-    Inference: <0.5ms on Raspberry Pi 4 (ARM Cortex-A72)
+    Total: 19,745 parameters (measured, EXP-002)
+    Inference latency: UNMEASURED. To be profiled on Raspberry Pi 4
+    (ARM Cortex-A72) during the on-device benchmark; no latency figure may
+    be cited until logged (freeze-report precondition 1).
 
 Safety Guarantees:
     - CNN NEVER overrides SEVERE_FATIGUE or FACE_LOST_CRITICAL.
@@ -174,7 +176,7 @@ class CNNValidator:
         1. Check if EAR is in uncertainty zone.
         2. Check rate-limiter.
         3. Extract eye ROI from frame.
-        4. Run TFLite inference (~0.5ms).
+        4. Run TFLite inference (latency unmeasured; profile on-device).
         5. Return CNNVerdict with agreement analysis.
     """
 

@@ -13,7 +13,7 @@ import hashlib
 import cv2
 import json
 
-RAW_DIR = "data/raw"
+RAW_DIR = "Data"  # real dataset root (mrl_eye/, nthu_ddd/, yawdd/); lowercase data/raw was a stale pre-consolidation path
 REPORT_PATH = "reports/phase02/dataset_integrity_report.md"
 
 

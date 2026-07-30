@@ -1,0 +1,7 @@
+{
+  "status": "PASS",
+  "fp16_model_exists": true,
+  "int8_model_exists": true,
+  "test_eval_completed": true,
+  "input_output_contract_valid": true
+}

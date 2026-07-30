@@ -1,0 +1,27 @@
+{
+  "exp_id": "EXP-002",
+  "seed": 42,
+  "learning_rate": 0.001,
+  "batch_size": 64,
+  "max_epochs": 30,
+  "clipnorm": 1.0,
+  "optimizer": "adam",
+  "loss": "binary_crossentropy",
+  "dropout": 0.3,
+  "lr_scheduler": {
+    "type": "ReduceLROnPlateau",
+    "factor": 0.5,
+    "patience": 3,
+    "monitor": "val_loss"
+  },
+  "early_stopping": {
+    "monitor": "val_loss",
+    "patience": 5,
+    "restore_best_weights": true
+  },
+  "mixed_precision": false,
+  "weight_decay": null,
+  "augmentation": "Part4: hflip0.5, bright\u00b120%0.5, contrast\u00b115%0.3, rot\u00b18\u00b00.3, noise\u03c30.02 0.2",
+  "class_weights": null,
+  "tf_version": "2.17.1"
+}

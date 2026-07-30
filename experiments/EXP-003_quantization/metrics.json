@@ -1,0 +1,90 @@
+{
+  "exp_id": "EXP-003",
+  "date": "2026-07-28",
+  "parameter_count": 19745,
+  "test_samples": 9377,
+  "fp32_keras": {
+    "threshold": 0.5,
+    "accuracy": 0.9362269382531726,
+    "balanced_accuracy": 0.9004660485927127,
+    "precision": 0.9742149604288997,
+    "recall": 0.9506726457399103,
+    "specificity": 0.8502594514455152,
+    "f1": 0.9622998360862438,
+    "roc_auc": 0.969218604048174,
+    "pr_auc": 0.9937010511409482,
+    "brier": 0.04799454997212216,
+    "confusion_matrix": {
+      "tp": 7632,
+      "tn": 1147,
+      "fp": 202,
+      "fn": 396
+    }
+  },
+  "fp32_tflite": {
+    "threshold": 0.5,
+    "accuracy": 0.9362269382531726,
+    "balanced_accuracy": 0.9004660485927127,
+    "precision": 0.9742149604288997,
+    "recall": 0.9506726457399103,
+    "specificity": 0.8502594514455152,
+    "f1": 0.9622998360862438,
+    "roc_auc": 0.9692188810623161,
+    "pr_auc": 0.9937010307532383,
+    "brier": 0.04799455206691688,
+    "confusion_matrix": {
+      "tp": 7632,
+      "tn": 1147,
+      "fp": 202,
+      "fn": 396
+    }
+  },
+  "float16_tflite": {
+    "threshold": 0.5,
+    "accuracy": 0.9362269382531726,
+    "balanced_accuracy": 0.9004660485927127,
+    "precision": 0.9742149604288997,
+    "recall": 0.9506726457399103,
+    "specificity": 0.8502594514455152,
+    "f1": 0.9622998360862438,
+    "roc_auc": 0.9692190195693872,
+    "pr_auc": 0.9937022760502658,
+    "brier": 0.04797639115899623,
+    "confusion_matrix": {
+      "tp": 7632,
+      "tn": 1147,
+      "fp": 202,
+      "fn": 396
+    }
+  },
+  "int8_tflite": {
+    "threshold": 0.5,
+    "accuracy": 0.9356937186733497,
+    "balanced_accuracy": 0.8955291948897909,
+    "precision": 0.9723883445731009,
+    "recall": 0.9519182859990035,
+    "specificity": 0.8391401037805782,
+    "f1": 0.9620444388493737,
+    "roc_auc": 0.9683394073300897,
+    "pr_auc": 0.9938648747861886,
+    "brier": 0.04838587885105344,
+    "confusion_matrix": {
+      "tp": 7642,
+      "tn": 1132,
+      "fp": 217,
+      "fn": 386
+    }
+  },
+  "size_analysis": {
+    "fp32_tflite_bytes": 83060,
+    "fp32_tflite_kb": 81.11328125,
+    "fp16_tflite_bytes": 44500,
+    "fp16_tflite_kb": 43.45703125,
+    "fp16_compression_ratio": 1.8665168539325843,
+    "fp16_size_reduction_pct": 46.4242716108837,
+    "int8_tflite_bytes": 26160,
+    "int8_tflite_kb": 25.546875,
+    "int8_compression_ratio": 3.1750764525993884,
+    "int8_size_reduction_pct": 68.50469540091501
+  }
+}

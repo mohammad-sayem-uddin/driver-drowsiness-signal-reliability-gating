@@ -1,0 +1,3719 @@
+{
+  "experiment_id": "EXP-005",
+  "title": "Event-Level Alarm Evaluation (NTHU-DDD, V0\u2013V4)",
+  "protocol": {
+    "dataset": "NTHU-DDD",
+    "nthu_root": "Data/nthu_ddd",
+    "subjects": [
+      "001",
+      "002",
+      "005",
+      "006"
+    ],
+    "video_fps": 30.0,
+    "segment_unit": "(subject, glasses, condition)",
+    "primary_regime": "per-recording reset (fresh FrameProcessor per recording)",
+    "secondary_regime": "per-subject concatenation (EXP-004 interleaved order)",
+    "matching_primary": "max_overlap (order-independent, one-to-one)",
+    "matching_secondary": "greedy_onset (robustness cross-check)",
+    "k_sweep_seconds": [
+      0.0,
+      0.25,
+      0.5,
+      1.0,
+      2.0
+    ],
+    "debounce": {
+      "source": "reimplemented on the video clock in exp005_event_report.py \u2014 NOT src/alarm_controller.py (which hard-codes time.monotonic()/datetime.now())",
+      "min_alarm_duration_s": 3.0,
+      "cooldown_period_s": 5.0
+    },
+    "statistics": "descriptive only; n=4 subjects; no significance tests; bootstrap is a labelled dispersion band, not a test",
+    "label_limitation": "clip-condition-derived labels \u2014 clip-level alarm behaviour, not free-driving episodes (see plan \u00a7'Honest framing')",
+    "sklearn_used": false,
+    "max_frames_per_subject": null
+  },
+  "wall_clock_seconds": 2790.88,
+  "event_stream_md5": {
+    "V0": "d694f72b25a822e29201cdea8afb2bd6",
+    "V1": "00d9e52b6309531d3274df2c84e5ddb8",
+    "V2": "574bdaec941ee10f73d9f05dc42d827e",
+    "V3": "f958e65df0cd55ac395b0d881deaf590",
+    "V4": "f958e65df0cd55ac395b0d881deaf590"
+  },
+  "observability_gates": {
+    "gates": {
+      "G1_cnn_observable": {
+        "status": "FAIL",
+        "comparison": "V3 vs V4",
+        "regime": "secondary",
+        "n_diff_frames": 0,
+        "n_compared_frames": 66521,
+        "subjects_with_diff": [],
+        "note": "CNN arm must be observable at the event level (EXP-004 was blind)."
+      },
+      "G2_gate_observable": {
+        "status": "FAIL",
+        "comparison": "V0 vs V2",
+        "regime": "secondary",
+        "n_diff_frames": 0,
+        "n_compared_frames": 66521,
+        "subjects_with_diff": [],
+        "note": "Reliability-gate suppression path must be observable."
+      },
+      "G3_speech_observable": {
+        "status": "FAIL",
+        "comparison": "V0 vs V1",
+        "regime": "secondary",
+        "n_diff_frames": 0,
+        "n_compared_frames": 66521,
+        "subjects_with_diff": [],
+        "note": "Speech-filter path must be observable."
+      }
+    },
+    "all_ran_pass": false
+  },
+  "paired_deltas_descriptive": {
+    "gate_V0_vs_V2": {
+      "comparison": "V0 -> V2",
+      "per_subject": [
+        {
+          "subject": "001",
+          "d_fp": 0,
+          "d_tp": 0,
+          "d_fn": 0,
+          "d_fa_per_hour_total": 0.0
+        },
+        {
+          "subject": "002",
+          "d_fp": 0,
+          "d_tp": -1,
+          "d_fn": 1,
+          "d_fa_per_hour_total": 0.0
+        },
+        {
+          "subject": "005",
+          "d_fp": 0,
+          "d_tp": 0,
+          "d_fn": 0,
+          "d_fa_per_hour_total": 0.0
+        },
+        {
+          "subject": "006",
+          "d_fp": 0,
+          "d_tp": 0,
+          "d_fn": 0,
+          "d_fa_per_hour_total": 0.0
+        }
+      ]
+    },
+    "speech_V0_vs_V1": {
+      "comparison": "V0 -> V1",
+      "per_subject": [
+        {
+          "subject": "001",
+          "d_fp": 0,
+          "d_tp": 0,
+          "d_fn": 0,
+          "d_fa_per_hour_total": 0.0
+        },
+        {
+          "subject": "002",
+          "d_fp": 0,
+          "d_tp": -1,
+          "d_fn": 1,
+          "d_fa_per_hour_total": 0.0
+        },
+        {
+          "subject": "005",
+          "d_fp": -1,
+          "d_tp": 0,
+          "d_fn": 0,
+          "d_fa_per_hour_total": -4.924086992203531
+        },
+        {
+          "subject": "006",
+          "d_fp": 0,
+          "d_tp": 0,
+          "d_fn": 0,
+          "d_fa_per_hour_total": 0.0
+        }
+      ]
+    },
+    "cnn_V3_vs_V4": {
+      "comparison": "V3 -> V4",
+      "per_subject": [
+        {
+          "subject": "001",
+          "d_fp": 0,
+          "d_tp": 0,
+          "d_fn": 0,
+          "d_fa_per_hour_total": 0.0
+        },
+        {
+          "subject": "002",
+          "d_fp": 0,
+          "d_tp": 0,
+          "d_fn": 0,
+          "d_fa_per_hour_total": 0.0
+        },
+        {
+          "subject": "005",
+          "d_fp": 0,
+          "d_tp": 0,
+          "d_fn": 0,
+          "d_fa_per_hour_total": 0.0
+        },
+        {
+          "subject": "006",
+          "d_fp": 0,
+          "d_tp": 0,
+          "d_fn": 0,
+          "d_fa_per_hour_total": 0.0
+        }
+      ]
+    }
+  },
+  "per_variant": {
+    "V0_baseline": {
+      "variant_key": "V0",
+      "toggles": {
+        "speech_filter": false,
+        "reliability_gate": false,
+        "cnn": false
+      },
+      "primary": {
+        "strategy": "max_overlap",
+        "per_subject": {
+          "001": {
+            "n_recordings": 8,
+            "n_frames": 19016,
+            "recording_hours": 0.17607407407407408,
+            "alert_hours": 0.08733333333333333,
+            "tp": 0,
+            "fp": 0,
+            "fn": 13,
+            "recall": 0.0,
+            "precision": 0.0,
+            "miss_rate": 1.0,
+            "f1": 0.0,
+            "fa_per_hour_total": 0.0,
+            "fa_per_hour_alert": 0.0,
+            "n_gt_episodes": 13,
+            "n_alarm_events": 0,
+            "alarm_duty_cycle": 0.0,
+            "latency": {
+              "n": 0,
+              "median": NaN,
+              "q1": NaN,
+              "q3": NaN,
+              "iqr": NaN,
+              "min": NaN,
+              "max": NaN,
+              "mean": NaN
+            }
+          },
+          "002": {
+            "n_recordings": 8,
+            "n_frames": 18833,
+            "recording_hours": 0.17437962962962963,
+            "alert_hours": 0.07626851851851851,
+            "tp": 2,
+            "fp": 0,
+            "fn": 9,
+            "recall": 0.18181818181818182,
+            "precision": 1.0,
+            "miss_rate": 0.8181818181818182,
+            "f1": 0.3076923076923077,
+            "fa_per_hour_total": 0.0,
+            "fa_per_hour_alert": 0.0,
+            "n_gt_episodes": 11,
+            "n_alarm_events": 2,
+            "alarm_duty_cycle": 0.009876280996123825,
+            "latency": {
+              "n": 2,
+              "median": 22.766666666666666,
+              "q1": 15.083333333333336,
+              "q3": 30.45,
+              "iqr": 15.366666666666664,
+              "min": 7.400000000000002,
+              "max": 38.13333333333333,
+              "mean": 22.766666666666666
+            }
+          },
+          "005": {
+            "n_recordings": 8,
+            "n_frames": 21933,
+            "recording_hours": 0.20308333333333334,
+            "alert_hours": 0.08190740740740741,
+            "tp": 4,
+            "fp": 6,
+            "fn": 10,
+            "recall": 0.2857142857142857,
+            "precision": 0.4,
+            "miss_rate": 0.7142857142857143,
+            "f1": 0.3333333333333333,
+            "fa_per_hour_total": 29.544521953221174,
+            "fa_per_hour_alert": 73.25344788605018,
+            "n_gt_episodes": 14,
+            "n_alarm_events": 10,
+            "alarm_duty_cycle": 0.05247800118542835,
+            "latency": {
+              "n": 4,
+              "median": 3.5166666666666693,
+              "q1": 2.825000000000003,
+              "q3": 15.016666666666666,
+              "iqr": 12.191666666666663,
+              "min": 1.3999999999999986,
+              "max": 48.86666666666666,
+              "mean": 14.325
+            }
+          },
+          "006": {
+            "n_recordings": 3,
+            "n_frames": 6739,
+            "recording_hours": 0.06239814814814815,
+            "alert_hours": 0.036814814814814814,
+            "tp": 0,
+            "fp": 0,
+            "fn": 3,
+            "recall": 0.0,
+            "precision": 0.0,
+            "miss_rate": 1.0,
+            "f1": 0.0,
+            "fa_per_hour_total": 0.0,
+            "fa_per_hour_alert": 0.0,
+            "n_gt_episodes": 3,
+            "n_alarm_events": 0,
+            "alarm_duty_cycle": 0.0,
+            "latency": {
+              "n": 0,
+              "median": NaN,
+              "q1": NaN,
+              "q3": NaN,
+              "iqr": NaN,
+              "min": NaN,
+              "max": NaN,
+              "mean": NaN
+            }
+          }
+        },
+        "pooled_micro": {
+          "tp": 6,
+          "fp": 6,
+          "fn": 35,
+          "recall": 0.14634146341463414,
+          "precision": 0.5,
+          "miss_rate": 0.8536585365853658,
+          "f1": 0.22641509433962262,
+          "recording_hours": 0.6159351851851852,
+          "alert_hours": 0.28232407407407406,
+          "fa_per_hour_total": 9.741284707084981,
+          "fa_per_hour_alert": 21.252172772293466,
+          "latency": {
+            "n": 6,
+            "median": 5.566666666666668,
+            "q1": 3.4083333333333368,
+            "q3": 30.45,
+            "iqr": 27.041666666666664,
+            "min": 1.3999999999999986,
+            "max": 48.86666666666666,
+            "mean": 17.13888888888889
+          }
+        },
+        "macro_over_subjects": {
+          "recall": 0.11688311688311688,
+          "precision": 0.35,
+          "miss_rate": 0.8831168831168832,
+          "f1": 0.16025641025641024,
+          "fa_per_hour_total": 7.386130488305294,
+          "fa_per_hour_alert": 18.313361971512546
+        },
+        "k_sweep": [
+          {
+            "k_seconds": 0.0,
+            "tolerance_frames": 1,
+            "tp": 6,
+            "fp": 6,
+            "fn": 35,
+            "recall": 0.14634146341463414,
+            "precision": 0.5,
+            "f1": 0.22641509433962262,
+            "fa_per_hour_total": 9.741284707084981
+          },
+          {
+            "k_seconds": 0.25,
+            "tolerance_frames": 8,
+            "tp": 6,
+            "fp": 6,
+            "fn": 35,
+            "recall": 0.14634146341463414,
+            "precision": 0.5,
+            "f1": 0.22641509433962262,
+            "fa_per_hour_total": 9.741284707084981
+          },
+          {
+            "k_seconds": 0.5,
+            "tolerance_frames": 15,
+            "tp": 6,
+            "fp": 6,
+            "fn": 35,
+            "recall": 0.14634146341463414,
+            "precision": 0.5,
+            "f1": 0.22641509433962262,
+            "fa_per_hour_total": 9.741284707084981
+          },
+          {
+            "k_seconds": 1.0,
+            "tolerance_frames": 30,
+            "tp": 6,
+            "fp": 6,
+            "fn": 35,
+            "recall": 0.14634146341463414,
+            "precision": 0.5,
+            "f1": 0.22641509433962262,
+            "fa_per_hour_total": 9.741284707084981
+          },
+          {
+            "k_seconds": 2.0,
+            "tolerance_frames": 60,
+            "tp": 6,
+            "fp": 6,
+            "fn": 35,
+            "recall": 0.14634146341463414,
+            "precision": 0.5,
+            "f1": 0.22641509433962262,
+            "fa_per_hour_total": 9.741284707084981
+          }
+        ],
+        "bootstrap_descriptive": {
+          "note": "Subject-stratified percentile bootstrap dispersion band (B=2000, seed 42). NOT a significance test: with n=4 subjects it bounds within-sample dispersion only (plan \u00a7Statistics).",
+          "fa_per_hour_total": {
+            "point": 9.741284707084981,
+            "lo": 0.0,
+            "hi": 22.970034974950373,
+            "mean": 9.058705980891178,
+            "std": 7.52071477588915,
+            "n_boot": 2000,
+            "ci_level": 0.95,
+            "seed": 42
+          },
+          "recall": {
+            "point": 0.14634146341463414,
+            "lo": 0.0,
+            "hi": 0.2641509433962264,
+            "mean": 0.1404945644247492,
+            "std": 0.06860978392523735,
+            "n_boot": 2000,
+            "ci_level": 0.95,
+            "seed": 42
+          }
+        }
+      },
+      "secondary": {
+        "strategy": "greedy_onset",
+        "per_subject": {
+          "001": {
+            "n_recordings": 8,
+            "n_frames": 19016,
+            "recording_hours": 0.17607407407407408,
+            "alert_hours": 0.08733333333333333,
+            "tp": 2,
+            "fp": 78,
+            "fn": 11,
+            "recall": 0.15384615384615385,
+            "precision": 0.025,
+            "miss_rate": 0.8461538461538461,
+            "f1": 0.043010752688172046,
+            "fa_per_hour_total": 442.99537231804794,
+            "fa_per_hour_alert": 893.1297709923664,
+            "n_gt_episodes": 13,
+            "n_alarm_events": 80,
+            "alarm_duty_cycle": 0.005626840555321835,
+            "latency": {
+              "n": 2,
+              "median": 27.233333333333334,
+              "q1": 25.000000000000004,
+              "q3": 29.46666666666667,
+              "iqr": 4.466666666666665,
+              "min": 22.76666666666667,
+              "max": 31.700000000000003,
+              "mean": 27.233333333333334
+            }
+          },
+          "002": {
+            "n_recordings": 8,
+            "n_frames": 18833,
+            "recording_hours": 0.17437962962962963,
+            "alert_hours": 0.07626851851851851,
+            "tp": 8,
+            "fp": 644,
+            "fn": 3,
+            "recall": 0.7272727272727273,
+            "precision": 0.012269938650306749,
+            "miss_rate": 0.2727272727272727,
+            "f1": 0.024132730015082957,
+            "fa_per_hour_total": 3693.0919131312057,
+            "fa_per_hour_alert": 8443.85091659585,
+            "n_gt_episodes": 11,
+            "n_alarm_events": 652,
+            "alarm_duty_cycle": 0.05447884033345723,
+            "latency": {
+              "n": 8,
+              "median": 8.7,
+              "q1": 2.066666666666666,
+              "q3": 15.35,
+              "iqr": 13.283333333333333,
+              "min": 1.2999999999999972,
+              "max": 18.133333333333333,
+              "mean": 8.954166666666666
+            }
+          },
+          "005": {
+            "n_recordings": 8,
+            "n_frames": 21933,
+            "recording_hours": 0.20308333333333334,
+            "alert_hours": 0.08190740740740741,
+            "tp": 2,
+            "fp": 1,
+            "fn": 12,
+            "recall": 0.14285714285714285,
+            "precision": 0.6666666666666666,
+            "miss_rate": 0.8571428571428571,
+            "f1": 0.23529411764705882,
+            "fa_per_hour_total": 4.924086992203529,
+            "fa_per_hour_alert": 12.208907981008364,
+            "n_gt_episodes": 14,
+            "n_alarm_events": 3,
+            "alarm_duty_cycle": 0.0001823735923038344,
+            "latency": {
+              "n": 2,
+              "median": 22.283333333333335,
+              "q1": 15.325000000000001,
+              "q3": 29.241666666666667,
+              "iqr": 13.916666666666666,
+              "min": 8.366666666666667,
+              "max": 36.2,
+              "mean": 22.283333333333335
+            }
+          },
+          "006": {
+            "n_recordings": 3,
+            "n_frames": 6739,
+            "recording_hours": 0.06239814814814815,
+            "alert_hours": 0.036814814814814814,
+            "tp": 0,
+            "fp": 0,
+            "fn": 3,
+            "recall": 0.0,
+            "precision": 0.0,
+            "miss_rate": 1.0,
+            "f1": 0.0,
+            "fa_per_hour_total": 0.0,
+            "fa_per_hour_alert": 0.0,
+            "n_gt_episodes": 3,
+            "n_alarm_events": 0,
+            "alarm_duty_cycle": 0.0,
+            "latency": {
+              "n": 0,
+              "median": NaN,
+              "q1": NaN,
+              "q3": NaN,
+              "iqr": NaN,
+              "min": NaN,
+              "max": NaN,
+              "mean": NaN
+            }
+          }
+        },
+        "pooled_micro": {
+          "tp": 12,
+          "fp": 723,
+          "fn": 29,
+          "recall": 0.2926829268292683,
+          "precision": 0.0163265306122449,
+          "miss_rate": 0.7073170731707317,
+          "f1": 0.030927835051546393,
+          "recording_hours": 0.6159351851851852,
+          "alert_hours": 0.28232407407407406,
+          "fa_per_hour_total": 1173.8248072037402,
+          "fa_per_hour_alert": 2560.8868190613625,
+          "latency": {
+            "n": 12,
+            "median": 12.483333333333333,
+            "q1": 6.316666666666666,
+            "q3": 19.291666666666668,
+            "iqr": 12.975000000000001,
+            "min": 1.2999999999999972,
+            "max": 36.2,
+            "mean": 14.222222222222223
+          }
+        },
+        "macro_over_subjects": {
+          "recall": 0.255994005994006,
+          "precision": 0.17598415132924333,
+          "miss_rate": 0.744005994005994,
+          "f1": 0.07560940008757845,
+          "fa_per_hour_total": 1035.2528431103642,
+          "fa_per_hour_alert": 2337.297398892306
+        },
+        "k_sweep": [
+          {
+            "k_seconds": 0.0,
+            "tolerance_frames": 1,
+            "tp": 12,
+            "fp": 723,
+            "fn": 29,
+            "recall": 0.2926829268292683,
+            "precision": 0.0163265306122449,
+            "f1": 0.030927835051546393,
+            "fa_per_hour_total": 1173.8248072037402
+          },
+          {
+            "k_seconds": 0.25,
+            "tolerance_frames": 8,
+            "tp": 1,
+            "fp": 734,
+            "fn": 40,
+            "recall": 0.024390243902439025,
+            "precision": 0.0013605442176870747,
+            "f1": 0.002577319587628866,
+            "fa_per_hour_total": 1191.6838291667293
+          },
+          {
+            "k_seconds": 0.5,
+            "tolerance_frames": 15,
+            "tp": 1,
+            "fp": 734,
+            "fn": 40,
+            "recall": 0.024390243902439025,
+            "precision": 0.0013605442176870747,
+            "f1": 0.002577319587628866,
+            "fa_per_hour_total": 1191.6838291667293
+          },
+          {
+            "k_seconds": 1.0,
+            "tolerance_frames": 30,
+            "tp": 0,
+            "fp": 735,
+            "fn": 41,
+            "recall": 0.0,
+            "precision": 0.0,
+            "f1": 0.0,
+            "fa_per_hour_total": 1193.3073766179102
+          },
+          {
+            "k_seconds": 2.0,
+            "tolerance_frames": 60,
+            "tp": 0,
+            "fp": 735,
+            "fn": 41,
+            "recall": 0.0,
+            "precision": 0.0,
+            "f1": 0.0,
+            "fa_per_hour_total": 1193.3073766179102
+          }
+        ],
+        "bootstrap_descriptive": {
+          "note": "Subject-stratified percentile bootstrap dispersion band (B=2000, seed 42). NOT a significance test: with n=4 subjects it bounds within-sample dispersion only (plan \u00a7Statistics).",
+          "fa_per_hour_total": {
+            "point": 1173.8248072037402,
+            "lo": 3.766741071428571,
+            "hi": 2874.6606634443488,
+            "mean": 1169.8761237836513,
+            "std": 836.7840643228383,
+            "n_boot": 2000,
+            "ci_level": 0.95,
+            "seed": 42
+          },
+          "recall": {
+            "point": 0.2926829268292683,
+            "lo": 0.09090909090909091,
+            "hi": 0.5714285714285714,
+            "mean": 0.29303258400757287,
+            "std": 0.13964553515109532,
+            "n_boot": 2000,
+            "ci_level": 0.95,
+            "seed": 42
+          }
+        }
+      },
+      "debounced_primary": {
+        "strategy": "max_overlap",
+        "per_subject": {
+          "001": {
+            "n_recordings": 8,
+            "n_frames": 19016,
+            "recording_hours": 0.17607407407407408,
+            "alert_hours": 0.08733333333333333,
+            "tp": 0,
+            "fp": 0,
+            "fn": 13,
+            "recall": 0.0,
+            "precision": 0.0,
+            "miss_rate": 1.0,
+            "f1": 0.0,
+            "fa_per_hour_total": 0.0,
+            "fa_per_hour_alert": 0.0,
+            "n_gt_episodes": 13,
+            "n_alarm_events": 0,
+            "alarm_duty_cycle": 0.0,
+            "latency": {
+              "n": 0,
+              "median": NaN,
+              "q1": NaN,
+              "q3": NaN,
+              "iqr": NaN,
+              "min": NaN,
+              "max": NaN,
+              "mean": NaN
+            }
+          },
+          "002": {
+            "n_recordings": 8,
+            "n_frames": 18833,
+            "recording_hours": 0.17437962962962963,
+            "alert_hours": 0.07626851851851851,
+            "tp": 2,
+            "fp": 0,
+            "fn": 9,
+            "recall": 0.18181818181818182,
+            "precision": 1.0,
+            "miss_rate": 0.8181818181818182,
+            "f1": 0.3076923076923077,
+            "fa_per_hour_total": 0.0,
+            "fa_per_hour_alert": 0.0,
+            "n_gt_episodes": 11,
+            "n_alarm_events": 2,
+            "alarm_duty_cycle": 0.010619656985079383,
+            "latency": {
+              "n": 2,
+              "median": 22.766666666666666,
+              "q1": 15.083333333333336,
+              "q3": 30.45,
+              "iqr": 15.366666666666664,
+              "min": 7.400000000000002,
+              "max": 38.13333333333333,
+              "mean": 22.766666666666666
+            }
+          },
+          "005": {
+            "n_recordings": 8,
+            "n_frames": 21933,
+            "recording_hours": 0.20308333333333334,
+            "alert_hours": 0.08190740740740741,
+            "tp": 4,
+            "fp": 5,
+            "fn": 10,
+            "recall": 0.2857142857142857,
+            "precision": 0.4444444444444444,
+            "miss_rate": 0.7142857142857143,
+            "f1": 0.34782608695652173,
+            "fa_per_hour_total": 24.620434961017644,
+            "fa_per_hour_alert": 61.04453990504182,
+            "n_gt_episodes": 14,
+            "n_alarm_events": 9,
+            "alarm_duty_cycle": 0.05411936351616286,
+            "latency": {
+              "n": 4,
+              "median": 3.5166666666666693,
+              "q1": 2.825000000000003,
+              "q3": 15.016666666666666,
+              "iqr": 12.191666666666663,
+              "min": 1.3999999999999986,
+              "max": 48.86666666666666,
+              "mean": 14.325
+            }
+          },
+          "006": {
+            "n_recordings": 3,
+            "n_frames": 6739,
+            "recording_hours": 0.06239814814814815,
+            "alert_hours": 0.036814814814814814,
+            "tp": 0,
+            "fp": 0,
+            "fn": 3,
+            "recall": 0.0,
+            "precision": 0.0,
+            "miss_rate": 1.0,
+            "f1": 0.0,
+            "fa_per_hour_total": 0.0,
+            "fa_per_hour_alert": 0.0,
+            "n_gt_episodes": 3,
+            "n_alarm_events": 0,
+            "alarm_duty_cycle": 0.0,
+            "latency": {
+              "n": 0,
+              "median": NaN,
+              "q1": NaN,
+              "q3": NaN,
+              "iqr": NaN,
+              "min": NaN,
+              "max": NaN,
+              "mean": NaN
+            }
+          }
+        },
+        "pooled_micro": {
+          "tp": 6,
+          "fp": 5,
+          "fn": 35,
+          "recall": 0.14634146341463414,
+          "precision": 0.5454545454545454,
+          "miss_rate": 0.8536585365853658,
+          "f1": 0.23076923076923073,
+          "recording_hours": 0.6159351851851852,
+          "alert_hours": 0.28232407407407406,
+          "fa_per_hour_total": 8.117737255904151,
+          "fa_per_hour_alert": 17.71014397691122,
+          "latency": {
+            "n": 6,
+            "median": 5.566666666666668,
+            "q1": 3.4083333333333368,
+            "q3": 30.45,
+            "iqr": 27.041666666666664,
+            "min": 1.3999999999999986,
+            "max": 48.86666666666666,
+            "mean": 17.13888888888889
+          }
+        },
+        "macro_over_subjects": {
+          "recall": 0.11688311688311688,
+          "precision": 0.3611111111111111,
+          "miss_rate": 0.8831168831168832,
+          "f1": 0.16387959866220736,
+          "fa_per_hour_total": 6.155108740254411,
+          "fa_per_hour_alert": 15.261134976260456
+        },
+        "k_sweep": [
+          {
+            "k_seconds": 0.0,
+            "tolerance_frames": 1,
+            "tp": 6,
+            "fp": 5,
+            "fn": 35,
+            "recall": 0.14634146341463414,
+            "precision": 0.5454545454545454,
+            "f1": 0.23076923076923073,
+            "fa_per_hour_total": 8.117737255904151
+          },
+          {
+            "k_seconds": 0.25,
+            "tolerance_frames": 8,
+            "tp": 6,
+            "fp": 5,
+            "fn": 35,
+            "recall": 0.14634146341463414,
+            "precision": 0.5454545454545454,
+            "f1": 0.23076923076923073,
+            "fa_per_hour_total": 8.117737255904151
+          },
+          {
+            "k_seconds": 0.5,
+            "tolerance_frames": 15,
+            "tp": 6,
+            "fp": 5,
+            "fn": 35,
+            "recall": 0.14634146341463414,
+            "precision": 0.5454545454545454,
+            "f1": 0.23076923076923073,
+            "fa_per_hour_total": 8.117737255904151
+          },
+          {
+            "k_seconds": 1.0,
+            "tolerance_frames": 30,
+            "tp": 6,
+            "fp": 5,
+            "fn": 35,
+            "recall": 0.14634146341463414,
+            "precision": 0.5454545454545454,
+            "f1": 0.23076923076923073,
+            "fa_per_hour_total": 8.117737255904151
+          },
+          {
+            "k_seconds": 2.0,
+            "tolerance_frames": 60,
+            "tp": 6,
+            "fp": 5,
+            "fn": 35,
+            "recall": 0.14634146341463414,
+            "precision": 0.5454545454545454,
+            "f1": 0.23076923076923073,
+            "fa_per_hour_total": 8.117737255904151
+          }
+        ],
+        "bootstrap_descriptive": {
+          "note": "Subject-stratified percentile bootstrap dispersion band (B=2000, seed 42). NOT a significance test: with n=4 subjects it bounds within-sample dispersion only (plan \u00a7Statistics).",
+          "fa_per_hour_total": {
+            "point": 8.117737255904151,
+            "lo": 0.0,
+            "hi": 19.141695812458643,
+            "mean": 7.548921650742649,
+            "std": 6.267262313240958,
+            "n_boot": 2000,
+            "ci_level": 0.95,
+            "seed": 42
+          },
+          "recall": {
+            "point": 0.14634146341463414,
+            "lo": 0.0,
+            "hi": 0.2641509433962264,
+            "mean": 0.1404945644247492,
+            "std": 0.06860978392523735,
+            "n_boot": 2000,
+            "ci_level": 0.95,
+            "seed": 42
+          }
+        }
+      },
+      "contamination_delta": {
+        "primary_total_edges": 24,
+        "secondary_total_edges": 1469,
+        "edge_count_abs_delta": 1485,
+        "boundary_window_frames": 5,
+        "secondary_edges_near_boundary": 0,
+        "secondary_edges_total": 1469,
+        "secondary_edge_boundary_fraction": 0.0,
+        "fp_events_primary": 6,
+        "fp_events_secondary": 723,
+        "fp_events_delta": 717,
+        "tp_events_primary": 6,
+        "tp_events_secondary": 12,
+        "tp_events_delta": 6,
+        "note": "Reported finding, not pass/fail. Near-zero delta => boundary carryover negligible for this corpus; large delta justifies PRIMARY (per-recording reset) as the headline regime."
+      }
+    },
+    "V1_speech_filter": {
+      "variant_key": "V1",
+      "toggles": {
+        "speech_filter": true,
+        "reliability_gate": false,
+        "cnn": false
+      },
+      "primary": {
+        "strategy": "max_overlap",
+        "per_subject": {
+          "001": {
+            "n_recordings": 8,
+            "n_frames": 19016,
+            "recording_hours": 0.17607407407407408,
+            "alert_hours": 0.08733333333333333,
+            "tp": 0,
+            "fp": 0,
+            "fn": 13,
+            "recall": 0.0,
+            "precision": 0.0,
+            "miss_rate": 1.0,
+            "f1": 0.0,
+            "fa_per_hour_total": 0.0,
+            "fa_per_hour_alert": 0.0,
+            "n_gt_episodes": 13,
+            "n_alarm_events": 0,
+            "alarm_duty_cycle": 0.0,
+            "latency": {
+              "n": 0,
+              "median": NaN,
+              "q1": NaN,
+              "q3": NaN,
+              "iqr": NaN,
+              "min": NaN,
+              "max": NaN,
+              "mean": NaN
+            }
+          },
+          "002": {
+            "n_recordings": 8,
+            "n_frames": 18833,
+            "recording_hours": 0.17437962962962963,
+            "alert_hours": 0.07626851851851851,
+            "tp": 1,
+            "fp": 0,
+            "fn": 10,
+            "recall": 0.09090909090909091,
+            "precision": 1.0,
+            "miss_rate": 0.9090909090909091,
+            "f1": 0.16666666666666669,
+            "fa_per_hour_total": 0.0,
+            "fa_per_hour_alert": 0.0,
+            "n_gt_episodes": 11,
+            "n_alarm_events": 1,
+            "alarm_duty_cycle": 0.004035469654330165,
+            "latency": {
+              "n": 1,
+              "median": 38.6,
+              "q1": 38.6,
+              "q3": 38.6,
+              "iqr": 0.0,
+              "min": 38.6,
+              "max": 38.6,
+              "mean": 38.6
+            }
+          },
+          "005": {
+            "n_recordings": 8,
+            "n_frames": 21933,
+            "recording_hours": 0.20308333333333334,
+            "alert_hours": 0.08190740740740741,
+            "tp": 4,
+            "fp": 5,
+            "fn": 10,
+            "recall": 0.2857142857142857,
+            "precision": 0.4444444444444444,
+            "miss_rate": 0.7142857142857143,
+            "f1": 0.34782608695652173,
+            "fa_per_hour_total": 24.620434961017644,
+            "fa_per_hour_alert": 61.04453990504182,
+            "n_gt_episodes": 14,
+            "n_alarm_events": 9,
+            "alarm_duty_cycle": 0.04750832079514886,
+            "latency": {
+              "n": 4,
+              "median": 3.75,
+              "q1": 2.8916666666666657,
+              "q3": 15.341666666666667,
+              "iqr": 12.450000000000001,
+              "min": 1.4666666666666615,
+              "max": 48.96666666666667,
+              "mean": 14.483333333333333
+            }
+          },
+          "006": {
+            "n_recordings": 3,
+            "n_frames": 6739,
+            "recording_hours": 0.06239814814814815,
+            "alert_hours": 0.036814814814814814,
+            "tp": 0,
+            "fp": 0,
+            "fn": 3,
+            "recall": 0.0,
+            "precision": 0.0,
+            "miss_rate": 1.0,
+            "f1": 0.0,
+            "fa_per_hour_total": 0.0,
+            "fa_per_hour_alert": 0.0,
+            "n_gt_episodes": 3,
+            "n_alarm_events": 0,
+            "alarm_duty_cycle": 0.0,
+            "latency": {
+              "n": 0,
+              "median": NaN,
+              "q1": NaN,
+              "q3": NaN,
+              "iqr": NaN,
+              "min": NaN,
+              "max": NaN,
+              "mean": NaN
+            }
+          }
+        },
+        "pooled_micro": {
+          "tp": 5,
+          "fp": 5,
+          "fn": 36,
+          "recall": 0.12195121951219512,
+          "precision": 0.5,
+          "miss_rate": 0.8780487804878049,
+          "f1": 0.19607843137254902,
+          "recording_hours": 0.6159351851851852,
+          "alert_hours": 0.28232407407407406,
+          "fa_per_hour_total": 8.117737255904151,
+          "fa_per_hour_alert": 17.71014397691122,
+          "latency": {
+            "n": 5,
+            "median": 4.133333333333333,
+            "q1": 3.366666666666667,
+            "q3": 38.6,
+            "iqr": 35.233333333333334,
+            "min": 1.4666666666666615,
+            "max": 48.96666666666667,
+            "mean": 19.306666666666665
+          }
+        },
+        "macro_over_subjects": {
+          "recall": 0.09415584415584416,
+          "precision": 0.3611111111111111,
+          "miss_rate": 0.9058441558441559,
+          "f1": 0.12862318840579712,
+          "fa_per_hour_total": 6.155108740254411,
+          "fa_per_hour_alert": 15.261134976260456
+        },
+        "k_sweep": [
+          {
+            "k_seconds": 0.0,
+            "tolerance_frames": 1,
+            "tp": 5,
+            "fp": 5,
+            "fn": 36,
+            "recall": 0.12195121951219512,
+            "precision": 0.5,
+            "f1": 0.19607843137254902,
+            "fa_per_hour_total": 8.117737255904151
+          },
+          {
+            "k_seconds": 0.25,
+            "tolerance_frames": 8,
+            "tp": 5,
+            "fp": 5,
+            "fn": 36,
+            "recall": 0.12195121951219512,
+            "precision": 0.5,
+            "f1": 0.19607843137254902,
+            "fa_per_hour_total": 8.117737255904151
+          },
+          {
+            "k_seconds": 0.5,
+            "tolerance_frames": 15,
+            "tp": 5,
+            "fp": 5,
+            "fn": 36,
+            "recall": 0.12195121951219512,
+            "precision": 0.5,
+            "f1": 0.19607843137254902,
+            "fa_per_hour_total": 8.117737255904151
+          },
+          {
+            "k_seconds": 1.0,
+            "tolerance_frames": 30,
+            "tp": 5,
+            "fp": 5,
+            "fn": 36,
+            "recall": 0.12195121951219512,
+            "precision": 0.5,
+            "f1": 0.19607843137254902,
+            "fa_per_hour_total": 8.117737255904151
+          },
+          {
+            "k_seconds": 2.0,
+            "tolerance_frames": 60,
+            "tp": 5,
+            "fp": 5,
+            "fn": 36,
+            "recall": 0.12195121951219512,
+            "precision": 0.5,
+            "f1": 0.19607843137254902,
+            "fa_per_hour_total": 8.117737255904151
+          }
+        ],
+        "bootstrap_descriptive": {
+          "note": "Subject-stratified percentile bootstrap dispersion band (B=2000, seed 42). NOT a significance test: with n=4 subjects it bounds within-sample dispersion only (plan \u00a7Statistics).",
+          "fa_per_hour_total": {
+            "point": 8.117737255904151,
+            "lo": 0.0,
+            "hi": 19.141695812458643,
+            "mean": 7.548921650742649,
+            "std": 6.267262313240958,
+            "n_boot": 2000,
+            "ci_level": 0.95,
+            "seed": 42
+          },
+          "recall": {
+            "point": 0.12195121951219512,
+            "lo": 0.0,
+            "hi": 0.24528301886792453,
+            "mean": 0.11560861223542923,
+            "std": 0.0687350246082963,
+            "n_boot": 2000,
+            "ci_level": 0.95,
+            "seed": 42
+          }
+        }
+      },
+      "secondary": {
+        "strategy": "greedy_onset",
+        "per_subject": {
+          "001": {
+            "n_recordings": 8,
+            "n_frames": 19016,
+            "recording_hours": 0.17607407407407408,
+            "alert_hours": 0.08733333333333333,
+            "tp": 2,
+            "fp": 78,
+            "fn": 11,
+            "recall": 0.15384615384615385,
+            "precision": 0.025,
+            "miss_rate": 0.8461538461538461,
+            "f1": 0.043010752688172046,
+            "fa_per_hour_total": 442.99537231804794,
+            "fa_per_hour_alert": 893.1297709923664,
+            "n_gt_episodes": 13,
+            "n_alarm_events": 80,
+            "alarm_duty_cycle": 0.005626840555321835,
+            "latency": {
+              "n": 2,
+              "median": 27.233333333333334,
+              "q1": 25.000000000000004,
+              "q3": 29.46666666666667,
+              "iqr": 4.466666666666665,
+              "min": 22.76666666666667,
+              "max": 31.700000000000003,
+              "mean": 27.233333333333334
+            }
+          },
+          "002": {
+            "n_recordings": 8,
+            "n_frames": 18833,
+            "recording_hours": 0.17437962962962963,
+            "alert_hours": 0.07626851851851851,
+            "tp": 8,
+            "fp": 644,
+            "fn": 3,
+            "recall": 0.7272727272727273,
+            "precision": 0.012269938650306749,
+            "miss_rate": 0.2727272727272727,
+            "f1": 0.024132730015082957,
+            "fa_per_hour_total": 3693.0919131312057,
+            "fa_per_hour_alert": 8443.85091659585,
+            "n_gt_episodes": 11,
+            "n_alarm_events": 652,
+            "alarm_duty_cycle": 0.05447884033345723,
+            "latency": {
+              "n": 8,
+              "median": 8.7,
+              "q1": 2.066666666666666,
+              "q3": 15.35,
+              "iqr": 13.283333333333333,
+              "min": 1.2999999999999972,
+              "max": 18.133333333333333,
+              "mean": 8.954166666666666
+            }
+          },
+          "005": {
+            "n_recordings": 8,
+            "n_frames": 21933,
+            "recording_hours": 0.20308333333333334,
+            "alert_hours": 0.08190740740740741,
+            "tp": 2,
+            "fp": 1,
+            "fn": 12,
+            "recall": 0.14285714285714285,
+            "precision": 0.6666666666666666,
+            "miss_rate": 0.8571428571428571,
+            "f1": 0.23529411764705882,
+            "fa_per_hour_total": 4.924086992203529,
+            "fa_per_hour_alert": 12.208907981008364,
+            "n_gt_episodes": 14,
+            "n_alarm_events": 3,
+            "alarm_duty_cycle": 0.0001823735923038344,
+            "latency": {
+              "n": 2,
+              "median": 22.283333333333335,
+              "q1": 15.325000000000001,
+              "q3": 29.241666666666667,
+              "iqr": 13.916666666666666,
+              "min": 8.366666666666667,
+              "max": 36.2,
+              "mean": 22.283333333333335
+            }
+          },
+          "006": {
+            "n_recordings": 3,
+            "n_frames": 6739,
+            "recording_hours": 0.06239814814814815,
+            "alert_hours": 0.036814814814814814,
+            "tp": 0,
+            "fp": 0,
+            "fn": 3,
+            "recall": 0.0,
+            "precision": 0.0,
+            "miss_rate": 1.0,
+            "f1": 0.0,
+            "fa_per_hour_total": 0.0,
+            "fa_per_hour_alert": 0.0,
+            "n_gt_episodes": 3,
+            "n_alarm_events": 0,
+            "alarm_duty_cycle": 0.0,
+            "latency": {
+              "n": 0,
+              "median": NaN,
+              "q1": NaN,
+              "q3": NaN,
+              "iqr": NaN,
+              "min": NaN,
+              "max": NaN,
+              "mean": NaN
+            }
+          }
+        },
+        "pooled_micro": {
+          "tp": 12,
+          "fp": 723,
+          "fn": 29,
+          "recall": 0.2926829268292683,
+          "precision": 0.0163265306122449,
+          "miss_rate": 0.7073170731707317,
+          "f1": 0.030927835051546393,
+          "recording_hours": 0.6159351851851852,
+          "alert_hours": 0.28232407407407406,
+          "fa_per_hour_total": 1173.8248072037402,
+          "fa_per_hour_alert": 2560.8868190613625,
+          "latency": {
+            "n": 12,
+            "median": 12.483333333333333,
+            "q1": 6.316666666666666,
+            "q3": 19.291666666666668,
+            "iqr": 12.975000000000001,
+            "min": 1.2999999999999972,
+            "max": 36.2,
+            "mean": 14.222222222222223
+          }
+        },
+        "macro_over_subjects": {
+          "recall": 0.255994005994006,
+          "precision": 0.17598415132924333,
+          "miss_rate": 0.744005994005994,
+          "f1": 0.07560940008757845,
+          "fa_per_hour_total": 1035.2528431103642,
+          "fa_per_hour_alert": 2337.297398892306
+        },
+        "k_sweep": [
+          {
+            "k_seconds": 0.0,
+            "tolerance_frames": 1,
+            "tp": 12,
+            "fp": 723,
+            "fn": 29,
+            "recall": 0.2926829268292683,
+            "precision": 0.0163265306122449,
+            "f1": 0.030927835051546393,
+            "fa_per_hour_total": 1173.8248072037402
+          },
+          {
+            "k_seconds": 0.25,
+            "tolerance_frames": 8,
+            "tp": 1,
+            "fp": 734,
+            "fn": 40,
+            "recall": 0.024390243902439025,
+            "precision": 0.0013605442176870747,
+            "f1": 0.002577319587628866,
+            "fa_per_hour_total": 1191.6838291667293
+          },
+          {
+            "k_seconds": 0.5,
+            "tolerance_frames": 15,
+            "tp": 1,
+            "fp": 734,
+            "fn": 40,
+            "recall": 0.024390243902439025,
+            "precision": 0.0013605442176870747,
+            "f1": 0.002577319587628866,
+            "fa_per_hour_total": 1191.6838291667293
+          },
+          {
+            "k_seconds": 1.0,
+            "tolerance_frames": 30,
+            "tp": 0,
+            "fp": 735,
+            "fn": 41,
+            "recall": 0.0,
+            "precision": 0.0,
+            "f1": 0.0,
+            "fa_per_hour_total": 1193.3073766179102
+          },
+          {
+            "k_seconds": 2.0,
+            "tolerance_frames": 60,
+            "tp": 0,
+            "fp": 735,
+            "fn": 41,
+            "recall": 0.0,
+            "precision": 0.0,
+            "f1": 0.0,
+            "fa_per_hour_total": 1193.3073766179102
+          }
+        ],
+        "bootstrap_descriptive": {
+          "note": "Subject-stratified percentile bootstrap dispersion band (B=2000, seed 42). NOT a significance test: with n=4 subjects it bounds within-sample dispersion only (plan \u00a7Statistics).",
+          "fa_per_hour_total": {
+            "point": 1173.8248072037402,
+            "lo": 3.766741071428571,
+            "hi": 2874.6606634443488,
+            "mean": 1169.8761237836513,
+            "std": 836.7840643228383,
+            "n_boot": 2000,
+            "ci_level": 0.95,
+            "seed": 42
+          },
+          "recall": {
+            "point": 0.2926829268292683,
+            "lo": 0.09090909090909091,
+            "hi": 0.5714285714285714,
+            "mean": 0.29303258400757287,
+            "std": 0.13964553515109532,
+            "n_boot": 2000,
+            "ci_level": 0.95,
+            "seed": 42
+          }
+        }
+      },
+      "debounced_primary": {
+        "strategy": "max_overlap",
+        "per_subject": {
+          "001": {
+            "n_recordings": 8,
+            "n_frames": 19016,
+            "recording_hours": 0.17607407407407408,
+            "alert_hours": 0.08733333333333333,
+            "tp": 0,
+            "fp": 0,
+            "fn": 13,
+            "recall": 0.0,
+            "precision": 0.0,
+            "miss_rate": 1.0,
+            "f1": 0.0,
+            "fa_per_hour_total": 0.0,
+            "fa_per_hour_alert": 0.0,
+            "n_gt_episodes": 13,
+            "n_alarm_events": 0,
+            "alarm_duty_cycle": 0.0,
+            "latency": {
+              "n": 0,
+              "median": NaN,
+              "q1": NaN,
+              "q3": NaN,
+              "iqr": NaN,
+              "min": NaN,
+              "max": NaN,
+              "mean": NaN
+            }
+          },
+          "002": {
+            "n_recordings": 8,
+            "n_frames": 18833,
+            "recording_hours": 0.17437962962962963,
+            "alert_hours": 0.07626851851851851,
+            "tp": 1,
+            "fp": 0,
+            "fn": 10,
+            "recall": 0.09090909090909091,
+            "precision": 1.0,
+            "miss_rate": 0.9090909090909091,
+            "f1": 0.16666666666666669,
+            "fa_per_hour_total": 0.0,
+            "fa_per_hour_alert": 0.0,
+            "n_gt_episodes": 11,
+            "n_alarm_events": 1,
+            "alarm_duty_cycle": 0.004778845643285722,
+            "latency": {
+              "n": 1,
+              "median": 38.6,
+              "q1": 38.6,
+              "q3": 38.6,
+              "iqr": 0.0,
+              "min": 38.6,
+              "max": 38.6,
+              "mean": 38.6
+            }
+          },
+          "005": {
+            "n_recordings": 8,
+            "n_frames": 21933,
+            "recording_hours": 0.20308333333333334,
+            "alert_hours": 0.08190740740740741,
+            "tp": 4,
+            "fp": 4,
+            "fn": 10,
+            "recall": 0.2857142857142857,
+            "precision": 0.5,
+            "miss_rate": 0.7142857142857143,
+            "f1": 0.36363636363636365,
+            "fa_per_hour_total": 19.696347968814116,
+            "fa_per_hour_alert": 48.83563192403346,
+            "n_gt_episodes": 14,
+            "n_alarm_events": 8,
+            "alarm_duty_cycle": 0.04969680390279488,
+            "latency": {
+              "n": 4,
+              "median": 3.75,
+              "q1": 2.8916666666666657,
+              "q3": 15.341666666666667,
+              "iqr": 12.450000000000001,
+              "min": 1.4666666666666615,
+              "max": 48.96666666666667,
+              "mean": 14.483333333333333
+            }
+          },
+          "006": {
+            "n_recordings": 3,
+            "n_frames": 6739,
+            "recording_hours": 0.06239814814814815,
+            "alert_hours": 0.036814814814814814,
+            "tp": 0,
+            "fp": 0,
+            "fn": 3,
+            "recall": 0.0,
+            "precision": 0.0,
+            "miss_rate": 1.0,
+            "f1": 0.0,
+            "fa_per_hour_total": 0.0,
+            "fa_per_hour_alert": 0.0,
+            "n_gt_episodes": 3,
+            "n_alarm_events": 0,
+            "alarm_duty_cycle": 0.0,
+            "latency": {
+              "n": 0,
+              "median": NaN,
+              "q1": NaN,
+              "q3": NaN,
+              "iqr": NaN,
+              "min": NaN,
+              "max": NaN,
+              "mean": NaN
+            }
+          }
+        },
+        "pooled_micro": {
+          "tp": 5,
+          "fp": 4,
+          "fn": 36,
+          "recall": 0.12195121951219512,
+          "precision": 0.5555555555555556,
+          "miss_rate": 0.8780487804878049,
+          "f1": 0.2,
+          "recording_hours": 0.6159351851851852,
+          "alert_hours": 0.28232407407407406,
+          "fa_per_hour_total": 6.49418980472332,
+          "fa_per_hour_alert": 14.168115181528977,
+          "latency": {
+            "n": 5,
+            "median": 4.133333333333333,
+            "q1": 3.366666666666667,
+            "q3": 38.6,
+            "iqr": 35.233333333333334,
+            "min": 1.4666666666666615,
+            "max": 48.96666666666667,
+            "mean": 19.306666666666665
+          }
+        },
+        "macro_over_subjects": {
+          "recall": 0.09415584415584416,
+          "precision": 0.375,
+          "miss_rate": 0.9058441558441559,
+          "f1": 0.13257575757575757,
+          "fa_per_hour_total": 4.924086992203529,
+          "fa_per_hour_alert": 12.208907981008364
+        },
+        "k_sweep": [
+          {
+            "k_seconds": 0.0,
+            "tolerance_frames": 1,
+            "tp": 5,
+            "fp": 4,
+            "fn": 36,
+            "recall": 0.12195121951219512,
+            "precision": 0.5555555555555556,
+            "f1": 0.2,
+            "fa_per_hour_total": 6.49418980472332
+          },
+          {
+            "k_seconds": 0.25,
+            "tolerance_frames": 8,
+            "tp": 5,
+            "fp": 4,
+            "fn": 36,
+            "recall": 0.12195121951219512,
+            "precision": 0.5555555555555556,
+            "f1": 0.2,
+            "fa_per_hour_total": 6.49418980472332
+          },
+          {
+            "k_seconds": 0.5,
+            "tolerance_frames": 15,
+            "tp": 5,
+            "fp": 4,
+            "fn": 36,
+            "recall": 0.12195121951219512,
+            "precision": 0.5555555555555556,
+            "f1": 0.2,
+            "fa_per_hour_total": 6.49418980472332
+          },
+          {
+            "k_seconds": 1.0,
+            "tolerance_frames": 30,
+            "tp": 5,
+            "fp": 4,
+            "fn": 36,
+            "recall": 0.12195121951219512,
+            "precision": 0.5555555555555556,
+            "f1": 0.2,
+            "fa_per_hour_total": 6.49418980472332
+          },
+          {
+            "k_seconds": 2.0,
+            "tolerance_frames": 60,
+            "tp": 5,
+            "fp": 4,
+            "fn": 36,
+            "recall": 0.12195121951219512,
+            "precision": 0.5555555555555556,
+            "f1": 0.2,
+            "fa_per_hour_total": 6.49418980472332
+          }
+        ],
+        "bootstrap_descriptive": {
+          "note": "Subject-stratified percentile bootstrap dispersion band (B=2000, seed 42). NOT a significance test: with n=4 subjects it bounds within-sample dispersion only (plan \u00a7Statistics).",
+          "fa_per_hour_total": {
+            "point": 6.49418980472332,
+            "lo": 0.0,
+            "hi": 15.313356649966915,
+            "mean": 6.03913732059412,
+            "std": 5.013809850592767,
+            "n_boot": 2000,
+            "ci_level": 0.95,
+            "seed": 42
+          },
+          "recall": {
+            "point": 0.12195121951219512,
+            "lo": 0.0,
+            "hi": 0.24528301886792453,
+            "mean": 0.11560861223542923,
+            "std": 0.0687350246082963,
+            "n_boot": 2000,
+            "ci_level": 0.95,
+            "seed": 42
+          }
+        }
+      },
+      "contamination_delta": {
+        "primary_total_edges": 20,
+        "secondary_total_edges": 1469,
+        "edge_count_abs_delta": 1485,
+        "boundary_window_frames": 5,
+        "secondary_edges_near_boundary": 0,
+        "secondary_edges_total": 1469,
+        "secondary_edge_boundary_fraction": 0.0,
+        "fp_events_primary": 5,
+        "fp_events_secondary": 723,
+        "fp_events_delta": 718,
+        "tp_events_primary": 5,
+        "tp_events_secondary": 12,
+        "tp_events_delta": 7,
+        "note": "Reported finding, not pass/fail. Near-zero delta => boundary carryover negligible for this corpus; large delta justifies PRIMARY (per-recording reset) as the headline regime."
+      }
+    },
+    "V2_reliability_gate": {
+      "variant_key": "V2",
+      "toggles": {
+        "speech_filter": false,
+        "reliability_gate": true,
+        "cnn": false
+      },
+      "primary": {
+        "strategy": "max_overlap",
+        "per_subject": {
+          "001": {
+            "n_recordings": 8,
+            "n_frames": 19016,
+            "recording_hours": 0.17607407407407408,
+            "alert_hours": 0.08733333333333333,
+            "tp": 0,
+            "fp": 0,
+            "fn": 13,
+            "recall": 0.0,
+            "precision": 0.0,
+            "miss_rate": 1.0,
+            "f1": 0.0,
+            "fa_per_hour_total": 0.0,
+            "fa_per_hour_alert": 0.0,
+            "n_gt_episodes": 13,
+            "n_alarm_events": 0,
+            "alarm_duty_cycle": 0.0,
+            "latency": {
+              "n": 0,
+              "median": NaN,
+              "q1": NaN,
+              "q3": NaN,
+              "iqr": NaN,
+              "min": NaN,
+              "max": NaN,
+              "mean": NaN
+            }
+          },
+          "002": {
+            "n_recordings": 8,
+            "n_frames": 18833,
+            "recording_hours": 0.17437962962962963,
+            "alert_hours": 0.07626851851851851,
+            "tp": 1,
+            "fp": 0,
+            "fn": 10,
+            "recall": 0.09090909090909091,
+            "precision": 1.0,
+            "miss_rate": 0.9090909090909091,
+            "f1": 0.16666666666666669,
+            "fa_per_hour_total": 0.0,
+            "fa_per_hour_alert": 0.0,
+            "n_gt_episodes": 11,
+            "n_alarm_events": 1,
+            "alarm_duty_cycle": 0.004141666224180959,
+            "latency": {
+              "n": 1,
+              "median": 38.266666666666666,
+              "q1": 38.266666666666666,
+              "q3": 38.266666666666666,
+              "iqr": 0.0,
+              "min": 38.266666666666666,
+              "max": 38.266666666666666,
+              "mean": 38.266666666666666
+            }
+          },
+          "005": {
+            "n_recordings": 8,
+            "n_frames": 21933,
+            "recording_hours": 0.20308333333333334,
+            "alert_hours": 0.08190740740740741,
+            "tp": 4,
+            "fp": 6,
+            "fn": 10,
+            "recall": 0.2857142857142857,
+            "precision": 0.4,
+            "miss_rate": 0.7142857142857143,
+            "f1": 0.3333333333333333,
+            "fa_per_hour_total": 29.544521953221174,
+            "fa_per_hour_alert": 73.25344788605018,
+            "n_gt_episodes": 14,
+            "n_alarm_events": 10,
+            "alarm_duty_cycle": 0.05147494642775726,
+            "latency": {
+              "n": 4,
+              "median": 3.583333333333334,
+              "q1": 2.8583333333333343,
+              "q3": 15.100000000000001,
+              "iqr": 12.241666666666667,
+              "min": 1.43333333333333,
+              "max": 48.900000000000006,
+              "mean": 14.375
+            }
+          },
+          "006": {
+            "n_recordings": 3,
+            "n_frames": 6739,
+            "recording_hours": 0.06239814814814815,
+            "alert_hours": 0.036814814814814814,
+            "tp": 0,
+            "fp": 0,
+            "fn": 3,
+            "recall": 0.0,
+            "precision": 0.0,
+            "miss_rate": 1.0,
+            "f1": 0.0,
+            "fa_per_hour_total": 0.0,
+            "fa_per_hour_alert": 0.0,
+            "n_gt_episodes": 3,
+            "n_alarm_events": 0,
+            "alarm_duty_cycle": 0.0,
+            "latency": {
+              "n": 0,
+              "median": NaN,
+              "q1": NaN,
+              "q3": NaN,
+              "iqr": NaN,
+              "min": NaN,
+              "max": NaN,
+              "mean": NaN
+            }
+          }
+        },
+        "pooled_micro": {
+          "tp": 5,
+          "fp": 6,
+          "fn": 36,
+          "recall": 0.12195121951219512,
+          "precision": 0.45454545454545453,
+          "miss_rate": 0.8780487804878049,
+          "f1": 0.19230769230769232,
+          "recording_hours": 0.6159351851851852,
+          "alert_hours": 0.28232407407407406,
+          "fa_per_hour_total": 9.741284707084981,
+          "fa_per_hour_alert": 21.252172772293466,
+          "latency": {
+            "n": 5,
+            "median": 3.833333333333332,
+            "q1": 3.3333333333333357,
+            "q3": 38.266666666666666,
+            "iqr": 34.93333333333333,
+            "min": 1.43333333333333,
+            "max": 48.900000000000006,
+            "mean": 19.153333333333336
+          }
+        },
+        "macro_over_subjects": {
+          "recall": 0.09415584415584416,
+          "precision": 0.35,
+          "miss_rate": 0.9058441558441559,
+          "f1": 0.125,
+          "fa_per_hour_total": 7.386130488305294,
+          "fa_per_hour_alert": 18.313361971512546
+        },
+        "k_sweep": [
+          {
+            "k_seconds": 0.0,
+            "tolerance_frames": 1,
+            "tp": 5,
+            "fp": 6,
+            "fn": 36,
+            "recall": 0.12195121951219512,
+            "precision": 0.45454545454545453,
+            "f1": 0.19230769230769232,
+            "fa_per_hour_total": 9.741284707084981
+          },
+          {
+            "k_seconds": 0.25,
+            "tolerance_frames": 8,
+            "tp": 5,
+            "fp": 6,
+            "fn": 36,
+            "recall": 0.12195121951219512,
+            "precision": 0.45454545454545453,
+            "f1": 0.19230769230769232,
+            "fa_per_hour_total": 9.741284707084981
+          },
+          {
+            "k_seconds": 0.5,
+            "tolerance_frames": 15,
+            "tp": 5,
+            "fp": 6,
+            "fn": 36,
+            "recall": 0.12195121951219512,
+            "precision": 0.45454545454545453,
+            "f1": 0.19230769230769232,
+            "fa_per_hour_total": 9.741284707084981
+          },
+          {
+            "k_seconds": 1.0,
+            "tolerance_frames": 30,
+            "tp": 5,
+            "fp": 6,
+            "fn": 36,
+            "recall": 0.12195121951219512,
+            "precision": 0.45454545454545453,
+            "f1": 0.19230769230769232,
+            "fa_per_hour_total": 9.741284707084981
+          },
+          {
+            "k_seconds": 2.0,
+            "tolerance_frames": 60,
+            "tp": 5,
+            "fp": 6,
+            "fn": 36,
+            "recall": 0.12195121951219512,
+            "precision": 0.45454545454545453,
+            "f1": 0.19230769230769232,
+            "fa_per_hour_total": 9.741284707084981
+          }
+        ],
+        "bootstrap_descriptive": {
+          "note": "Subject-stratified percentile bootstrap dispersion band (B=2000, seed 42). NOT a significance test: with n=4 subjects it bounds within-sample dispersion only (plan \u00a7Statistics).",
+          "fa_per_hour_total": {
+            "point": 9.741284707084981,
+            "lo": 0.0,
+            "hi": 22.970034974950373,
+            "mean": 9.058705980891178,
+            "std": 7.52071477588915,
+            "n_boot": 2000,
+            "ci_level": 0.95,
+            "seed": 42
+          },
+          "recall": {
+            "point": 0.12195121951219512,
+            "lo": 0.0,
+            "hi": 0.24528301886792453,
+            "mean": 0.11560861223542923,
+            "std": 0.0687350246082963,
+            "n_boot": 2000,
+            "ci_level": 0.95,
+            "seed": 42
+          }
+        }
+      },
+      "secondary": {
+        "strategy": "greedy_onset",
+        "per_subject": {
+          "001": {
+            "n_recordings": 8,
+            "n_frames": 19016,
+            "recording_hours": 0.17607407407407408,
+            "alert_hours": 0.08733333333333333,
+            "tp": 2,
+            "fp": 78,
+            "fn": 11,
+            "recall": 0.15384615384615385,
+            "precision": 0.025,
+            "miss_rate": 0.8461538461538461,
+            "f1": 0.043010752688172046,
+            "fa_per_hour_total": 442.99537231804794,
+            "fa_per_hour_alert": 893.1297709923664,
+            "n_gt_episodes": 13,
+            "n_alarm_events": 80,
+            "alarm_duty_cycle": 0.005626840555321835,
+            "latency": {
+              "n": 2,
+              "median": 27.233333333333334,
+              "q1": 25.000000000000004,
+              "q3": 29.46666666666667,
+              "iqr": 4.466666666666665,
+              "min": 22.76666666666667,
+              "max": 31.700000000000003,
+              "mean": 27.233333333333334
+            }
+          },
+          "002": {
+            "n_recordings": 8,
+            "n_frames": 18833,
+            "recording_hours": 0.17437962962962963,
+            "alert_hours": 0.07626851851851851,
+            "tp": 8,
+            "fp": 644,
+            "fn": 3,
+            "recall": 0.7272727272727273,
+            "precision": 0.012269938650306749,
+            "miss_rate": 0.2727272727272727,
+            "f1": 0.024132730015082957,
+            "fa_per_hour_total": 3693.0919131312057,
+            "fa_per_hour_alert": 8443.85091659585,
+            "n_gt_episodes": 11,
+            "n_alarm_events": 652,
+            "alarm_duty_cycle": 0.05447884033345723,
+            "latency": {
+              "n": 8,
+              "median": 8.7,
+              "q1": 2.066666666666666,
+              "q3": 15.35,
+              "iqr": 13.283333333333333,
+              "min": 1.2999999999999972,
+              "max": 18.133333333333333,
+              "mean": 8.954166666666666
+            }
+          },
+          "005": {
+            "n_recordings": 8,
+            "n_frames": 21933,
+            "recording_hours": 0.20308333333333334,
+            "alert_hours": 0.08190740740740741,
+            "tp": 2,
+            "fp": 1,
+            "fn": 12,
+            "recall": 0.14285714285714285,
+            "precision": 0.6666666666666666,
+            "miss_rate": 0.8571428571428571,
+            "f1": 0.23529411764705882,
+            "fa_per_hour_total": 4.924086992203529,
+            "fa_per_hour_alert": 12.208907981008364,
+            "n_gt_episodes": 14,
+            "n_alarm_events": 3,
+            "alarm_duty_cycle": 0.0001823735923038344,
+            "latency": {
+              "n": 2,
+              "median": 22.283333333333335,
+              "q1": 15.325000000000001,
+              "q3": 29.241666666666667,
+              "iqr": 13.916666666666666,
+              "min": 8.366666666666667,
+              "max": 36.2,
+              "mean": 22.283333333333335
+            }
+          },
+          "006": {
+            "n_recordings": 3,
+            "n_frames": 6739,
+            "recording_hours": 0.06239814814814815,
+            "alert_hours": 0.036814814814814814,
+            "tp": 0,
+            "fp": 0,
+            "fn": 3,
+            "recall": 0.0,
+            "precision": 0.0,
+            "miss_rate": 1.0,
+            "f1": 0.0,
+            "fa_per_hour_total": 0.0,
+            "fa_per_hour_alert": 0.0,
+            "n_gt_episodes": 3,
+            "n_alarm_events": 0,
+            "alarm_duty_cycle": 0.0,
+            "latency": {
+              "n": 0,
+              "median": NaN,
+              "q1": NaN,
+              "q3": NaN,
+              "iqr": NaN,
+              "min": NaN,
+              "max": NaN,
+              "mean": NaN
+            }
+          }
+        },
+        "pooled_micro": {
+          "tp": 12,
+          "fp": 723,
+          "fn": 29,
+          "recall": 0.2926829268292683,
+          "precision": 0.0163265306122449,
+          "miss_rate": 0.7073170731707317,
+          "f1": 0.030927835051546393,
+          "recording_hours": 0.6159351851851852,
+          "alert_hours": 0.28232407407407406,
+          "fa_per_hour_total": 1173.8248072037402,
+          "fa_per_hour_alert": 2560.8868190613625,
+          "latency": {
+            "n": 12,
+            "median": 12.483333333333333,
+            "q1": 6.316666666666666,
+            "q3": 19.291666666666668,
+            "iqr": 12.975000000000001,
+            "min": 1.2999999999999972,
+            "max": 36.2,
+            "mean": 14.222222222222223
+          }
+        },
+        "macro_over_subjects": {
+          "recall": 0.255994005994006,
+          "precision": 0.17598415132924333,
+          "miss_rate": 0.744005994005994,
+          "f1": 0.07560940008757845,
+          "fa_per_hour_total": 1035.2528431103642,
+          "fa_per_hour_alert": 2337.297398892306
+        },
+        "k_sweep": [
+          {
+            "k_seconds": 0.0,
+            "tolerance_frames": 1,
+            "tp": 12,
+            "fp": 723,
+            "fn": 29,
+            "recall": 0.2926829268292683,
+            "precision": 0.0163265306122449,
+            "f1": 0.030927835051546393,
+            "fa_per_hour_total": 1173.8248072037402
+          },
+          {
+            "k_seconds": 0.25,
+            "tolerance_frames": 8,
+            "tp": 1,
+            "fp": 734,
+            "fn": 40,
+            "recall": 0.024390243902439025,
+            "precision": 0.0013605442176870747,
+            "f1": 0.002577319587628866,
+            "fa_per_hour_total": 1191.6838291667293
+          },
+          {
+            "k_seconds": 0.5,
+            "tolerance_frames": 15,
+            "tp": 1,
+            "fp": 734,
+            "fn": 40,
+            "recall": 0.024390243902439025,
+            "precision": 0.0013605442176870747,
+            "f1": 0.002577319587628866,
+            "fa_per_hour_total": 1191.6838291667293
+          },
+          {
+            "k_seconds": 1.0,
+            "tolerance_frames": 30,
+            "tp": 0,
+            "fp": 735,
+            "fn": 41,
+            "recall": 0.0,
+            "precision": 0.0,
+            "f1": 0.0,
+            "fa_per_hour_total": 1193.3073766179102
+          },
+          {
+            "k_seconds": 2.0,
+            "tolerance_frames": 60,
+            "tp": 0,
+            "fp": 735,
+            "fn": 41,
+            "recall": 0.0,
+            "precision": 0.0,
+            "f1": 0.0,
+            "fa_per_hour_total": 1193.3073766179102
+          }
+        ],
+        "bootstrap_descriptive": {
+          "note": "Subject-stratified percentile bootstrap dispersion band (B=2000, seed 42). NOT a significance test: with n=4 subjects it bounds within-sample dispersion only (plan \u00a7Statistics).",
+          "fa_per_hour_total": {
+            "point": 1173.8248072037402,
+            "lo": 3.766741071428571,
+            "hi": 2874.6606634443488,
+            "mean": 1169.8761237836513,
+            "std": 836.7840643228383,
+            "n_boot": 2000,
+            "ci_level": 0.95,
+            "seed": 42
+          },
+          "recall": {
+            "point": 0.2926829268292683,
+            "lo": 0.09090909090909091,
+            "hi": 0.5714285714285714,
+            "mean": 0.29303258400757287,
+            "std": 0.13964553515109532,
+            "n_boot": 2000,
+            "ci_level": 0.95,
+            "seed": 42
+          }
+        }
+      },
+      "debounced_primary": {
+        "strategy": "max_overlap",
+        "per_subject": {
+          "001": {
+            "n_recordings": 8,
+            "n_frames": 19016,
+            "recording_hours": 0.17607407407407408,
+            "alert_hours": 0.08733333333333333,
+            "tp": 0,
+            "fp": 0,
+            "fn": 13,
+            "recall": 0.0,
+            "precision": 0.0,
+            "miss_rate": 1.0,
+            "f1": 0.0,
+            "fa_per_hour_total": 0.0,
+            "fa_per_hour_alert": 0.0,
+            "n_gt_episodes": 13,
+            "n_alarm_events": 0,
+            "alarm_duty_cycle": 0.0,
+            "latency": {
+              "n": 0,
+              "median": NaN,
+              "q1": NaN,
+              "q3": NaN,
+              "iqr": NaN,
+              "min": NaN,
+              "max": NaN,
+              "mean": NaN
+            }
+          },
+          "002": {
+            "n_recordings": 8,
+            "n_frames": 18833,
+            "recording_hours": 0.17437962962962963,
+            "alert_hours": 0.07626851851851851,
+            "tp": 1,
+            "fp": 0,
+            "fn": 10,
+            "recall": 0.09090909090909091,
+            "precision": 1.0,
+            "miss_rate": 0.9090909090909091,
+            "f1": 0.16666666666666669,
+            "fa_per_hour_total": 0.0,
+            "fa_per_hour_alert": 0.0,
+            "n_gt_episodes": 11,
+            "n_alarm_events": 1,
+            "alarm_duty_cycle": 0.004778845643285722,
+            "latency": {
+              "n": 1,
+              "median": 38.266666666666666,
+              "q1": 38.266666666666666,
+              "q3": 38.266666666666666,
+              "iqr": 0.0,
+              "min": 38.266666666666666,
+              "max": 38.266666666666666,
+              "mean": 38.266666666666666
+            }
+          },
+          "005": {
+            "n_recordings": 8,
+            "n_frames": 21933,
+            "recording_hours": 0.20308333333333334,
+            "alert_hours": 0.08190740740740741,
+            "tp": 4,
+            "fp": 5,
+            "fn": 10,
+            "recall": 0.2857142857142857,
+            "precision": 0.4444444444444444,
+            "miss_rate": 0.7142857142857143,
+            "f1": 0.34782608695652173,
+            "fa_per_hour_total": 24.620434961017644,
+            "fa_per_hour_alert": 61.04453990504182,
+            "n_gt_episodes": 14,
+            "n_alarm_events": 9,
+            "alarm_duty_cycle": 0.05393698992385903,
+            "latency": {
+              "n": 4,
+              "median": 3.583333333333334,
+              "q1": 2.8583333333333343,
+              "q3": 15.100000000000001,
+              "iqr": 12.241666666666667,
+              "min": 1.43333333333333,
+              "max": 48.900000000000006,
+              "mean": 14.375
+            }
+          },
+          "006": {
+            "n_recordings": 3,
+            "n_frames": 6739,
+            "recording_hours": 0.06239814814814815,
+            "alert_hours": 0.036814814814814814,
+            "tp": 0,
+            "fp": 0,
+            "fn": 3,
+            "recall": 0.0,
+            "precision": 0.0,
+            "miss_rate": 1.0,
+            "f1": 0.0,
+            "fa_per_hour_total": 0.0,
+            "fa_per_hour_alert": 0.0,
+            "n_gt_episodes": 3,
+            "n_alarm_events": 0,
+            "alarm_duty_cycle": 0.0,
+            "latency": {
+              "n": 0,
+              "median": NaN,
+              "q1": NaN,
+              "q3": NaN,
+              "iqr": NaN,
+              "min": NaN,
+              "max": NaN,
+              "mean": NaN
+            }
+          }
+        },
+        "pooled_micro": {
+          "tp": 5,
+          "fp": 5,
+          "fn": 36,
+          "recall": 0.12195121951219512,
+          "precision": 0.5,
+          "miss_rate": 0.8780487804878049,
+          "f1": 0.19607843137254902,
+          "recording_hours": 0.6159351851851852,
+          "alert_hours": 0.28232407407407406,
+          "fa_per_hour_total": 8.117737255904151,
+          "fa_per_hour_alert": 17.71014397691122,
+          "latency": {
+            "n": 5,
+            "median": 3.833333333333332,
+            "q1": 3.3333333333333357,
+            "q3": 38.266666666666666,
+            "iqr": 34.93333333333333,
+            "min": 1.43333333333333,
+            "max": 48.900000000000006,
+            "mean": 19.153333333333336
+          }
+        },
+        "macro_over_subjects": {
+          "recall": 0.09415584415584416,
+          "precision": 0.3611111111111111,
+          "miss_rate": 0.9058441558441559,
+          "f1": 0.12862318840579712,
+          "fa_per_hour_total": 6.155108740254411,
+          "fa_per_hour_alert": 15.261134976260456
+        },
+        "k_sweep": [
+          {
+            "k_seconds": 0.0,
+            "tolerance_frames": 1,
+            "tp": 5,
+            "fp": 5,
+            "fn": 36,
+            "recall": 0.12195121951219512,
+            "precision": 0.5,
+            "f1": 0.19607843137254902,
+            "fa_per_hour_total": 8.117737255904151
+          },
+          {
+            "k_seconds": 0.25,
+            "tolerance_frames": 8,
+            "tp": 5,
+            "fp": 5,
+            "fn": 36,
+            "recall": 0.12195121951219512,
+            "precision": 0.5,
+            "f1": 0.19607843137254902,
+            "fa_per_hour_total": 8.117737255904151
+          },
+          {
+            "k_seconds": 0.5,
+            "tolerance_frames": 15,
+            "tp": 5,
+            "fp": 5,
+            "fn": 36,
+            "recall": 0.12195121951219512,
+            "precision": 0.5,
+            "f1": 0.19607843137254902,
+            "fa_per_hour_total": 8.117737255904151
+          },
+          {
+            "k_seconds": 1.0,
+            "tolerance_frames": 30,
+            "tp": 5,
+            "fp": 5,
+            "fn": 36,
+            "recall": 0.12195121951219512,
+            "precision": 0.5,
+            "f1": 0.19607843137254902,
+            "fa_per_hour_total": 8.117737255904151
+          },
+          {
+            "k_seconds": 2.0,
+            "tolerance_frames": 60,
+            "tp": 5,
+            "fp": 5,
+            "fn": 36,
+            "recall": 0.12195121951219512,
+            "precision": 0.5,
+            "f1": 0.19607843137254902,
+            "fa_per_hour_total": 8.117737255904151
+          }
+        ],
+        "bootstrap_descriptive": {
+          "note": "Subject-stratified percentile bootstrap dispersion band (B=2000, seed 42). NOT a significance test: with n=4 subjects it bounds within-sample dispersion only (plan \u00a7Statistics).",
+          "fa_per_hour_total": {
+            "point": 8.117737255904151,
+            "lo": 0.0,
+            "hi": 19.141695812458643,
+            "mean": 7.548921650742649,
+            "std": 6.267262313240958,
+            "n_boot": 2000,
+            "ci_level": 0.95,
+            "seed": 42
+          },
+          "recall": {
+            "point": 0.12195121951219512,
+            "lo": 0.0,
+            "hi": 0.24528301886792453,
+            "mean": 0.11560861223542923,
+            "std": 0.0687350246082963,
+            "n_boot": 2000,
+            "ci_level": 0.95,
+            "seed": 42
+          }
+        }
+      },
+      "contamination_delta": {
+        "primary_total_edges": 22,
+        "secondary_total_edges": 1469,
+        "edge_count_abs_delta": 1487,
+        "boundary_window_frames": 5,
+        "secondary_edges_near_boundary": 0,
+        "secondary_edges_total": 1469,
+        "secondary_edge_boundary_fraction": 0.0,
+        "fp_events_primary": 6,
+        "fp_events_secondary": 723,
+        "fp_events_delta": 717,
+        "tp_events_primary": 5,
+        "tp_events_secondary": 12,
+        "tp_events_delta": 7,
+        "note": "Reported finding, not pass/fail. Near-zero delta => boundary carryover negligible for this corpus; large delta justifies PRIMARY (per-recording reset) as the headline regime."
+      }
+    },
+    "V3_full": {
+      "variant_key": "V3",
+      "toggles": {
+        "speech_filter": true,
+        "reliability_gate": true,
+        "cnn": false
+      },
+      "primary": {
+        "strategy": "max_overlap",
+        "per_subject": {
+          "001": {
+            "n_recordings": 8,
+            "n_frames": 19016,
+            "recording_hours": 0.17607407407407408,
+            "alert_hours": 0.08733333333333333,
+            "tp": 0,
+            "fp": 0,
+            "fn": 13,
+            "recall": 0.0,
+            "precision": 0.0,
+            "miss_rate": 1.0,
+            "f1": 0.0,
+            "fa_per_hour_total": 0.0,
+            "fa_per_hour_alert": 0.0,
+            "n_gt_episodes": 13,
+            "n_alarm_events": 0,
+            "alarm_duty_cycle": 0.0,
+            "latency": {
+              "n": 0,
+              "median": NaN,
+              "q1": NaN,
+              "q3": NaN,
+              "iqr": NaN,
+              "min": NaN,
+              "max": NaN,
+              "mean": NaN
+            }
+          },
+          "002": {
+            "n_recordings": 8,
+            "n_frames": 18833,
+            "recording_hours": 0.17437962962962963,
+            "alert_hours": 0.07626851851851851,
+            "tp": 1,
+            "fp": 0,
+            "fn": 10,
+            "recall": 0.09090909090909091,
+            "precision": 1.0,
+            "miss_rate": 0.9090909090909091,
+            "f1": 0.16666666666666669,
+            "fa_per_hour_total": 0.0,
+            "fa_per_hour_alert": 0.0,
+            "n_gt_episodes": 11,
+            "n_alarm_events": 1,
+            "alarm_duty_cycle": 0.0031858970955238146,
+            "latency": {
+              "n": 1,
+              "median": 38.666666666666664,
+              "q1": 38.666666666666664,
+              "q3": 38.666666666666664,
+              "iqr": 0.0,
+              "min": 38.666666666666664,
+              "max": 38.666666666666664,
+              "mean": 38.666666666666664
+            }
+          },
+          "005": {
+            "n_recordings": 8,
+            "n_frames": 21933,
+            "recording_hours": 0.20308333333333334,
+            "alert_hours": 0.08190740740740741,
+            "tp": 4,
+            "fp": 4,
+            "fn": 10,
+            "recall": 0.2857142857142857,
+            "precision": 0.5,
+            "miss_rate": 0.7142857142857143,
+            "f1": 0.36363636363636365,
+            "fa_per_hour_total": 19.696347968814116,
+            "fa_per_hour_alert": 48.83563192403346,
+            "n_gt_episodes": 14,
+            "n_alarm_events": 8,
+            "alarm_duty_cycle": 0.041262025258742535,
+            "latency": {
+              "n": 4,
+              "median": 3.8000000000000025,
+              "q1": 2.950000000000003,
+              "q3": 15.383333333333333,
+              "iqr": 12.43333333333333,
+              "min": 1.5,
+              "max": 49.03333333333333,
+              "mean": 14.533333333333335
+            }
+          },
+          "006": {
+            "n_recordings": 3,
+            "n_frames": 6739,
+            "recording_hours": 0.06239814814814815,
+            "alert_hours": 0.036814814814814814,
+            "tp": 0,
+            "fp": 0,
+            "fn": 3,
+            "recall": 0.0,
+            "precision": 0.0,
+            "miss_rate": 1.0,
+            "f1": 0.0,
+            "fa_per_hour_total": 0.0,
+            "fa_per_hour_alert": 0.0,
+            "n_gt_episodes": 3,
+            "n_alarm_events": 0,
+            "alarm_duty_cycle": 0.0,
+            "latency": {
+              "n": 0,
+              "median": NaN,
+              "q1": NaN,
+              "q3": NaN,
+              "iqr": NaN,
+              "min": NaN,
+              "max": NaN,
+              "mean": NaN
+            }
+          }
+        },
+        "pooled_micro": {
+          "tp": 5,
+          "fp": 4,
+          "fn": 36,
+          "recall": 0.12195121951219512,
+          "precision": 0.5555555555555556,
+          "miss_rate": 0.8780487804878049,
+          "f1": 0.2,
+          "recording_hours": 0.6159351851851852,
+          "alert_hours": 0.28232407407407406,
+          "fa_per_hour_total": 6.49418980472332,
+          "fa_per_hour_alert": 14.168115181528977,
+          "latency": {
+            "n": 5,
+            "median": 4.166666666666668,
+            "q1": 3.433333333333337,
+            "q3": 38.666666666666664,
+            "iqr": 35.23333333333333,
+            "min": 1.5,
+            "max": 49.03333333333333,
+            "mean": 19.36
+          }
+        },
+        "macro_over_subjects": {
+          "recall": 0.09415584415584416,
+          "precision": 0.375,
+          "miss_rate": 0.9058441558441559,
+          "f1": 0.13257575757575757,
+          "fa_per_hour_total": 4.924086992203529,
+          "fa_per_hour_alert": 12.208907981008364
+        },
+        "k_sweep": [
+          {
+            "k_seconds": 0.0,
+            "tolerance_frames": 1,
+            "tp": 5,
+            "fp": 4,
+            "fn": 36,
+            "recall": 0.12195121951219512,
+            "precision": 0.5555555555555556,
+            "f1": 0.2,
+            "fa_per_hour_total": 6.49418980472332
+          },
+          {
+            "k_seconds": 0.25,
+            "tolerance_frames": 8,
+            "tp": 5,
+            "fp": 4,
+            "fn": 36,
+            "recall": 0.12195121951219512,
+            "precision": 0.5555555555555556,
+            "f1": 0.2,
+            "fa_per_hour_total": 6.49418980472332
+          },
+          {
+            "k_seconds": 0.5,
+            "tolerance_frames": 15,
+            "tp": 5,
+            "fp": 4,
+            "fn": 36,
+            "recall": 0.12195121951219512,
+            "precision": 0.5555555555555556,
+            "f1": 0.2,
+            "fa_per_hour_total": 6.49418980472332
+          },
+          {
+            "k_seconds": 1.0,
+            "tolerance_frames": 30,
+            "tp": 5,
+            "fp": 4,
+            "fn": 36,
+            "recall": 0.12195121951219512,
+            "precision": 0.5555555555555556,
+            "f1": 0.2,
+            "fa_per_hour_total": 6.49418980472332
+          },
+          {
+            "k_seconds": 2.0,
+            "tolerance_frames": 60,
+            "tp": 5,
+            "fp": 4,
+            "fn": 36,
+            "recall": 0.12195121951219512,
+            "precision": 0.5555555555555556,
+            "f1": 0.2,
+            "fa_per_hour_total": 6.49418980472332
+          }
+        ],
+        "bootstrap_descriptive": {
+          "note": "Subject-stratified percentile bootstrap dispersion band (B=2000, seed 42). NOT a significance test: with n=4 subjects it bounds within-sample dispersion only (plan \u00a7Statistics).",
+          "fa_per_hour_total": {
+            "point": 6.49418980472332,
+            "lo": 0.0,
+            "hi": 15.313356649966915,
+            "mean": 6.03913732059412,
+            "std": 5.013809850592767,
+            "n_boot": 2000,
+            "ci_level": 0.95,
+            "seed": 42
+          },
+          "recall": {
+            "point": 0.12195121951219512,
+            "lo": 0.0,
+            "hi": 0.24528301886792453,
+            "mean": 0.11560861223542923,
+            "std": 0.0687350246082963,
+            "n_boot": 2000,
+            "ci_level": 0.95,
+            "seed": 42
+          }
+        }
+      },
+      "secondary": {
+        "strategy": "greedy_onset",
+        "per_subject": {
+          "001": {
+            "n_recordings": 8,
+            "n_frames": 19016,
+            "recording_hours": 0.17607407407407408,
+            "alert_hours": 0.08733333333333333,
+            "tp": 2,
+            "fp": 78,
+            "fn": 11,
+            "recall": 0.15384615384615385,
+            "precision": 0.025,
+            "miss_rate": 0.8461538461538461,
+            "f1": 0.043010752688172046,
+            "fa_per_hour_total": 442.99537231804794,
+            "fa_per_hour_alert": 893.1297709923664,
+            "n_gt_episodes": 13,
+            "n_alarm_events": 80,
+            "alarm_duty_cycle": 0.005626840555321835,
+            "latency": {
+              "n": 2,
+              "median": 27.233333333333334,
+              "q1": 25.000000000000004,
+              "q3": 29.46666666666667,
+              "iqr": 4.466666666666665,
+              "min": 22.76666666666667,
+              "max": 31.700000000000003,
+              "mean": 27.233333333333334
+            }
+          },
+          "002": {
+            "n_recordings": 8,
+            "n_frames": 18833,
+            "recording_hours": 0.17437962962962963,
+            "alert_hours": 0.07626851851851851,
+            "tp": 8,
+            "fp": 644,
+            "fn": 3,
+            "recall": 0.7272727272727273,
+            "precision": 0.012269938650306749,
+            "miss_rate": 0.2727272727272727,
+            "f1": 0.024132730015082957,
+            "fa_per_hour_total": 3693.0919131312057,
+            "fa_per_hour_alert": 8443.85091659585,
+            "n_gt_episodes": 11,
+            "n_alarm_events": 652,
+            "alarm_duty_cycle": 0.05447884033345723,
+            "latency": {
+              "n": 8,
+              "median": 8.7,
+              "q1": 2.066666666666666,
+              "q3": 15.35,
+              "iqr": 13.283333333333333,
+              "min": 1.2999999999999972,
+              "max": 18.133333333333333,
+              "mean": 8.954166666666666
+            }
+          },
+          "005": {
+            "n_recordings": 8,
+            "n_frames": 21933,
+            "recording_hours": 0.20308333333333334,
+            "alert_hours": 0.08190740740740741,
+            "tp": 2,
+            "fp": 1,
+            "fn": 12,
+            "recall": 0.14285714285714285,
+            "precision": 0.6666666666666666,
+            "miss_rate": 0.8571428571428571,
+            "f1": 0.23529411764705882,
+            "fa_per_hour_total": 4.924086992203529,
+            "fa_per_hour_alert": 12.208907981008364,
+            "n_gt_episodes": 14,
+            "n_alarm_events": 3,
+            "alarm_duty_cycle": 0.0001823735923038344,
+            "latency": {
+              "n": 2,
+              "median": 22.283333333333335,
+              "q1": 15.325000000000001,
+              "q3": 29.241666666666667,
+              "iqr": 13.916666666666666,
+              "min": 8.366666666666667,
+              "max": 36.2,
+              "mean": 22.283333333333335
+            }
+          },
+          "006": {
+            "n_recordings": 3,
+            "n_frames": 6739,
+            "recording_hours": 0.06239814814814815,
+            "alert_hours": 0.036814814814814814,
+            "tp": 0,
+            "fp": 0,
+            "fn": 3,
+            "recall": 0.0,
+            "precision": 0.0,
+            "miss_rate": 1.0,
+            "f1": 0.0,
+            "fa_per_hour_total": 0.0,
+            "fa_per_hour_alert": 0.0,
+            "n_gt_episodes": 3,
+            "n_alarm_events": 0,
+            "alarm_duty_cycle": 0.0,
+            "latency": {
+              "n": 0,
+              "median": NaN,
+              "q1": NaN,
+              "q3": NaN,
+              "iqr": NaN,
+              "min": NaN,
+              "max": NaN,
+              "mean": NaN
+            }
+          }
+        },
+        "pooled_micro": {
+          "tp": 12,
+          "fp": 723,
+          "fn": 29,
+          "recall": 0.2926829268292683,
+          "precision": 0.0163265306122449,
+          "miss_rate": 0.7073170731707317,
+          "f1": 0.030927835051546393,
+          "recording_hours": 0.6159351851851852,
+          "alert_hours": 0.28232407407407406,
+          "fa_per_hour_total": 1173.8248072037402,
+          "fa_per_hour_alert": 2560.8868190613625,
+          "latency": {
+            "n": 12,
+            "median": 12.483333333333333,
+            "q1": 6.316666666666666,
+            "q3": 19.291666666666668,
+            "iqr": 12.975000000000001,
+            "min": 1.2999999999999972,
+            "max": 36.2,
+            "mean": 14.222222222222223
+          }
+        },
+        "macro_over_subjects": {
+          "recall": 0.255994005994006,
+          "precision": 0.17598415132924333,
+          "miss_rate": 0.744005994005994,
+          "f1": 0.07560940008757845,
+          "fa_per_hour_total": 1035.2528431103642,
+          "fa_per_hour_alert": 2337.297398892306
+        },
+        "k_sweep": [
+          {
+            "k_seconds": 0.0,
+            "tolerance_frames": 1,
+            "tp": 12,
+            "fp": 723,
+            "fn": 29,
+            "recall": 0.2926829268292683,
+            "precision": 0.0163265306122449,
+            "f1": 0.030927835051546393,
+            "fa_per_hour_total": 1173.8248072037402
+          },
+          {
+            "k_seconds": 0.25,
+            "tolerance_frames": 8,
+            "tp": 1,
+            "fp": 734,
+            "fn": 40,
+            "recall": 0.024390243902439025,
+            "precision": 0.0013605442176870747,
+            "f1": 0.002577319587628866,
+            "fa_per_hour_total": 1191.6838291667293
+          },
+          {
+            "k_seconds": 0.5,
+            "tolerance_frames": 15,
+            "tp": 1,
+            "fp": 734,
+            "fn": 40,
+            "recall": 0.024390243902439025,
+            "precision": 0.0013605442176870747,
+            "f1": 0.002577319587628866,
+            "fa_per_hour_total": 1191.6838291667293
+          },
+          {
+            "k_seconds": 1.0,
+            "tolerance_frames": 30,
+            "tp": 0,
+            "fp": 735,
+            "fn": 41,
+            "recall": 0.0,
+            "precision": 0.0,
+            "f1": 0.0,
+            "fa_per_hour_total": 1193.3073766179102
+          },
+          {
+            "k_seconds": 2.0,
+            "tolerance_frames": 60,
+            "tp": 0,
+            "fp": 735,
+            "fn": 41,
+            "recall": 0.0,
+            "precision": 0.0,
+            "f1": 0.0,
+            "fa_per_hour_total": 1193.3073766179102
+          }
+        ],
+        "bootstrap_descriptive": {
+          "note": "Subject-stratified percentile bootstrap dispersion band (B=2000, seed 42). NOT a significance test: with n=4 subjects it bounds within-sample dispersion only (plan \u00a7Statistics).",
+          "fa_per_hour_total": {
+            "point": 1173.8248072037402,
+            "lo": 3.766741071428571,
+            "hi": 2874.6606634443488,
+            "mean": 1169.8761237836513,
+            "std": 836.7840643228383,
+            "n_boot": 2000,
+            "ci_level": 0.95,
+            "seed": 42
+          },
+          "recall": {
+            "point": 0.2926829268292683,
+            "lo": 0.09090909090909091,
+            "hi": 0.5714285714285714,
+            "mean": 0.29303258400757287,
+            "std": 0.13964553515109532,
+            "n_boot": 2000,
+            "ci_level": 0.95,
+            "seed": 42
+          }
+        }
+      },
+      "debounced_primary": {
+        "strategy": "max_overlap",
+        "per_subject": {
+          "001": {
+            "n_recordings": 8,
+            "n_frames": 19016,
+            "recording_hours": 0.17607407407407408,
+            "alert_hours": 0.08733333333333333,
+            "tp": 0,
+            "fp": 0,
+            "fn": 13,
+            "recall": 0.0,
+            "precision": 0.0,
+            "miss_rate": 1.0,
+            "f1": 0.0,
+            "fa_per_hour_total": 0.0,
+            "fa_per_hour_alert": 0.0,
+            "n_gt_episodes": 13,
+            "n_alarm_events": 0,
+            "alarm_duty_cycle": 0.0,
+            "latency": {
+              "n": 0,
+              "median": NaN,
+              "q1": NaN,
+              "q3": NaN,
+              "iqr": NaN,
+              "min": NaN,
+              "max": NaN,
+              "mean": NaN
+            }
+          },
+          "002": {
+            "n_recordings": 8,
+            "n_frames": 18833,
+            "recording_hours": 0.17437962962962963,
+            "alert_hours": 0.07626851851851851,
+            "tp": 1,
+            "fp": 0,
+            "fn": 10,
+            "recall": 0.09090909090909091,
+            "precision": 1.0,
+            "miss_rate": 0.9090909090909091,
+            "f1": 0.16666666666666669,
+            "fa_per_hour_total": 0.0,
+            "fa_per_hour_alert": 0.0,
+            "n_gt_episodes": 11,
+            "n_alarm_events": 1,
+            "alarm_duty_cycle": 0.004778845643285722,
+            "latency": {
+              "n": 1,
+              "median": 38.666666666666664,
+              "q1": 38.666666666666664,
+              "q3": 38.666666666666664,
+              "iqr": 0.0,
+              "min": 38.666666666666664,
+              "max": 38.666666666666664,
+              "mean": 38.666666666666664
+            }
+          },
+          "005": {
+            "n_recordings": 8,
+            "n_frames": 21933,
+            "recording_hours": 0.20308333333333334,
+            "alert_hours": 0.08190740740740741,
+            "tp": 4,
+            "fp": 3,
+            "fn": 10,
+            "recall": 0.2857142857142857,
+            "precision": 0.5714285714285714,
+            "miss_rate": 0.7142857142857143,
+            "f1": 0.38095238095238093,
+            "fa_per_hour_total": 14.772260976610587,
+            "fa_per_hour_alert": 36.62672394302509,
+            "n_gt_episodes": 14,
+            "n_alarm_events": 7,
+            "alarm_duty_cycle": 0.04399762914330005,
+            "latency": {
+              "n": 4,
+              "median": 3.8000000000000025,
+              "q1": 2.950000000000003,
+              "q3": 15.383333333333333,
+              "iqr": 12.43333333333333,
+              "min": 1.5,
+              "max": 49.03333333333333,
+              "mean": 14.533333333333335
+            }
+          },
+          "006": {
+            "n_recordings": 3,
+            "n_frames": 6739,
+            "recording_hours": 0.06239814814814815,
+            "alert_hours": 0.036814814814814814,
+            "tp": 0,
+            "fp": 0,
+            "fn": 3,
+            "recall": 0.0,
+            "precision": 0.0,
+            "miss_rate": 1.0,
+            "f1": 0.0,
+            "fa_per_hour_total": 0.0,
+            "fa_per_hour_alert": 0.0,
+            "n_gt_episodes": 3,
+            "n_alarm_events": 0,
+            "alarm_duty_cycle": 0.0,
+            "latency": {
+              "n": 0,
+              "median": NaN,
+              "q1": NaN,
+              "q3": NaN,
+              "iqr": NaN,
+              "min": NaN,
+              "max": NaN,
+              "mean": NaN
+            }
+          }
+        },
+        "pooled_micro": {
+          "tp": 5,
+          "fp": 3,
+          "fn": 36,
+          "recall": 0.12195121951219512,
+          "precision": 0.625,
+          "miss_rate": 0.8780487804878049,
+          "f1": 0.20408163265306123,
+          "recording_hours": 0.6159351851851852,
+          "alert_hours": 0.28232407407407406,
+          "fa_per_hour_total": 4.8706423535424905,
+          "fa_per_hour_alert": 10.626086386146733,
+          "latency": {
+            "n": 5,
+            "median": 4.166666666666668,
+            "q1": 3.433333333333337,
+            "q3": 38.666666666666664,
+            "iqr": 35.23333333333333,
+            "min": 1.5,
+            "max": 49.03333333333333,
+            "mean": 19.36
+          }
+        },
+        "macro_over_subjects": {
+          "recall": 0.09415584415584416,
+          "precision": 0.39285714285714285,
+          "miss_rate": 0.9058441558441559,
+          "f1": 0.13690476190476192,
+          "fa_per_hour_total": 3.693065244152647,
+          "fa_per_hour_alert": 9.156680985756273
+        },
+        "k_sweep": [
+          {
+            "k_seconds": 0.0,
+            "tolerance_frames": 1,
+            "tp": 5,
+            "fp": 3,
+            "fn": 36,
+            "recall": 0.12195121951219512,
+            "precision": 0.625,
+            "f1": 0.20408163265306123,
+            "fa_per_hour_total": 4.8706423535424905
+          },
+          {
+            "k_seconds": 0.25,
+            "tolerance_frames": 8,
+            "tp": 5,
+            "fp": 3,
+            "fn": 36,
+            "recall": 0.12195121951219512,
+            "precision": 0.625,
+            "f1": 0.20408163265306123,
+            "fa_per_hour_total": 4.8706423535424905
+          },
+          {
+            "k_seconds": 0.5,
+            "tolerance_frames": 15,
+            "tp": 5,
+            "fp": 3,
+            "fn": 36,
+            "recall": 0.12195121951219512,
+            "precision": 0.625,
+            "f1": 0.20408163265306123,
+            "fa_per_hour_total": 4.8706423535424905
+          },
+          {
+            "k_seconds": 1.0,
+            "tolerance_frames": 30,
+            "tp": 5,
+            "fp": 3,
+            "fn": 36,
+            "recall": 0.12195121951219512,
+            "precision": 0.625,
+            "f1": 0.20408163265306123,
+            "fa_per_hour_total": 4.8706423535424905
+          },
+          {
+            "k_seconds": 2.0,
+            "tolerance_frames": 60,
+            "tp": 5,
+            "fp": 3,
+            "fn": 36,
+            "recall": 0.12195121951219512,
+            "precision": 0.625,
+            "f1": 0.20408163265306123,
+            "fa_per_hour_total": 4.8706423535424905
+          }
+        ],
+        "bootstrap_descriptive": {
+          "note": "Subject-stratified percentile bootstrap dispersion band (B=2000, seed 42). NOT a significance test: with n=4 subjects it bounds within-sample dispersion only (plan \u00a7Statistics).",
+          "fa_per_hour_total": {
+            "point": 4.8706423535424905,
+            "lo": 0.0,
+            "hi": 11.485017487475186,
+            "mean": 4.529352990445589,
+            "std": 3.760357387944575,
+            "n_boot": 2000,
+            "ci_level": 0.95,
+            "seed": 42
+          },
+          "recall": {
+            "point": 0.12195121951219512,
+            "lo": 0.0,
+            "hi": 0.24528301886792453,
+            "mean": 0.11560861223542923,
+            "std": 0.0687350246082963,
+            "n_boot": 2000,
+            "ci_level": 0.95,
+            "seed": 42
+          }
+        }
+      },
+      "contamination_delta": {
+        "primary_total_edges": 18,
+        "secondary_total_edges": 1469,
+        "edge_count_abs_delta": 1483,
+        "boundary_window_frames": 5,
+        "secondary_edges_near_boundary": 0,
+        "secondary_edges_total": 1469,
+        "secondary_edge_boundary_fraction": 0.0,
+        "fp_events_primary": 4,
+        "fp_events_secondary": 723,
+        "fp_events_delta": 719,
+        "tp_events_primary": 5,
+        "tp_events_secondary": 12,
+        "tp_events_delta": 7,
+        "note": "Reported finding, not pass/fail. Near-zero delta => boundary carryover negligible for this corpus; large delta justifies PRIMARY (per-recording reset) as the headline regime."
+      }
+    },
+    "V4_full_cnn": {
+      "variant_key": "V4",
+      "toggles": {
+        "speech_filter": true,
+        "reliability_gate": true,
+        "cnn": true
+      },
+      "primary": {
+        "strategy": "max_overlap",
+        "per_subject": {
+          "001": {
+            "n_recordings": 8,
+            "n_frames": 19016,
+            "recording_hours": 0.17607407407407408,
+            "alert_hours": 0.08733333333333333,
+            "tp": 0,
+            "fp": 0,
+            "fn": 13,
+            "recall": 0.0,
+            "precision": 0.0,
+            "miss_rate": 1.0,
+            "f1": 0.0,
+            "fa_per_hour_total": 0.0,
+            "fa_per_hour_alert": 0.0,
+            "n_gt_episodes": 13,
+            "n_alarm_events": 0,
+            "alarm_duty_cycle": 0.0,
+            "latency": {
+              "n": 0,
+              "median": NaN,
+              "q1": NaN,
+              "q3": NaN,
+              "iqr": NaN,
+              "min": NaN,
+              "max": NaN,
+              "mean": NaN
+            }
+          },
+          "002": {
+            "n_recordings": 8,
+            "n_frames": 18833,
+            "recording_hours": 0.17437962962962963,
+            "alert_hours": 0.07626851851851851,
+            "tp": 1,
+            "fp": 0,
+            "fn": 10,
+            "recall": 0.09090909090909091,
+            "precision": 1.0,
+            "miss_rate": 0.9090909090909091,
+            "f1": 0.16666666666666669,
+            "fa_per_hour_total": 0.0,
+            "fa_per_hour_alert": 0.0,
+            "n_gt_episodes": 11,
+            "n_alarm_events": 1,
+            "alarm_duty_cycle": 0.0031858970955238146,
+            "latency": {
+              "n": 1,
+              "median": 38.666666666666664,
+              "q1": 38.666666666666664,
+              "q3": 38.666666666666664,
+              "iqr": 0.0,
+              "min": 38.666666666666664,
+              "max": 38.666666666666664,
+              "mean": 38.666666666666664
+            }
+          },
+          "005": {
+            "n_recordings": 8,
+            "n_frames": 21933,
+            "recording_hours": 0.20308333333333334,
+            "alert_hours": 0.08190740740740741,
+            "tp": 4,
+            "fp": 4,
+            "fn": 10,
+            "recall": 0.2857142857142857,
+            "precision": 0.5,
+            "miss_rate": 0.7142857142857143,
+            "f1": 0.36363636363636365,
+            "fa_per_hour_total": 19.696347968814116,
+            "fa_per_hour_alert": 48.83563192403346,
+            "n_gt_episodes": 14,
+            "n_alarm_events": 8,
+            "alarm_duty_cycle": 0.041262025258742535,
+            "latency": {
+              "n": 4,
+              "median": 3.8000000000000025,
+              "q1": 2.950000000000003,
+              "q3": 15.383333333333333,
+              "iqr": 12.43333333333333,
+              "min": 1.5,
+              "max": 49.03333333333333,
+              "mean": 14.533333333333335
+            }
+          },
+          "006": {
+            "n_recordings": 3,
+            "n_frames": 6739,
+            "recording_hours": 0.06239814814814815,
+            "alert_hours": 0.036814814814814814,
+            "tp": 0,
+            "fp": 0,
+            "fn": 3,
+            "recall": 0.0,
+            "precision": 0.0,
+            "miss_rate": 1.0,
+            "f1": 0.0,
+            "fa_per_hour_total": 0.0,
+            "fa_per_hour_alert": 0.0,
+            "n_gt_episodes": 3,
+            "n_alarm_events": 0,
+            "alarm_duty_cycle": 0.0,
+            "latency": {
+              "n": 0,
+              "median": NaN,
+              "q1": NaN,
+              "q3": NaN,
+              "iqr": NaN,
+              "min": NaN,
+              "max": NaN,
+              "mean": NaN
+            }
+          }
+        },
+        "pooled_micro": {
+          "tp": 5,
+          "fp": 4,
+          "fn": 36,
+          "recall": 0.12195121951219512,
+          "precision": 0.5555555555555556,
+          "miss_rate": 0.8780487804878049,
+          "f1": 0.2,
+          "recording_hours": 0.6159351851851852,
+          "alert_hours": 0.28232407407407406,
+          "fa_per_hour_total": 6.49418980472332,
+          "fa_per_hour_alert": 14.168115181528977,
+          "latency": {
+            "n": 5,
+            "median": 4.166666666666668,
+            "q1": 3.433333333333337,
+            "q3": 38.666666666666664,
+            "iqr": 35.23333333333333,
+            "min": 1.5,
+            "max": 49.03333333333333,
+            "mean": 19.36
+          }
+        },
+        "macro_over_subjects": {
+          "recall": 0.09415584415584416,
+          "precision": 0.375,
+          "miss_rate": 0.9058441558441559,
+          "f1": 0.13257575757575757,
+          "fa_per_hour_total": 4.924086992203529,
+          "fa_per_hour_alert": 12.208907981008364
+        },
+        "k_sweep": [
+          {
+            "k_seconds": 0.0,
+            "tolerance_frames": 1,
+            "tp": 5,
+            "fp": 4,
+            "fn": 36,
+            "recall": 0.12195121951219512,
+            "precision": 0.5555555555555556,
+            "f1": 0.2,
+            "fa_per_hour_total": 6.49418980472332
+          },
+          {
+            "k_seconds": 0.25,
+            "tolerance_frames": 8,
+            "tp": 5,
+            "fp": 4,
+            "fn": 36,
+            "recall": 0.12195121951219512,
+            "precision": 0.5555555555555556,
+            "f1": 0.2,
+            "fa_per_hour_total": 6.49418980472332
+          },
+          {
+            "k_seconds": 0.5,
+            "tolerance_frames": 15,
+            "tp": 5,
+            "fp": 4,
+            "fn": 36,
+            "recall": 0.12195121951219512,
+            "precision": 0.5555555555555556,
+            "f1": 0.2,
+            "fa_per_hour_total": 6.49418980472332
+          },
+          {
+            "k_seconds": 1.0,
+            "tolerance_frames": 30,
+            "tp": 5,
+            "fp": 4,
+            "fn": 36,
+            "recall": 0.12195121951219512,
+            "precision": 0.5555555555555556,
+            "f1": 0.2,
+            "fa_per_hour_total": 6.49418980472332
+          },
+          {
+            "k_seconds": 2.0,
+            "tolerance_frames": 60,
+            "tp": 5,
+            "fp": 4,
+            "fn": 36,
+            "recall": 0.12195121951219512,
+            "precision": 0.5555555555555556,
+            "f1": 0.2,
+            "fa_per_hour_total": 6.49418980472332
+          }
+        ],
+        "bootstrap_descriptive": {
+          "note": "Subject-stratified percentile bootstrap dispersion band (B=2000, seed 42). NOT a significance test: with n=4 subjects it bounds within-sample dispersion only (plan \u00a7Statistics).",
+          "fa_per_hour_total": {
+            "point": 6.49418980472332,
+            "lo": 0.0,
+            "hi": 15.313356649966915,
+            "mean": 6.03913732059412,
+            "std": 5.013809850592767,
+            "n_boot": 2000,
+            "ci_level": 0.95,
+            "seed": 42
+          },
+          "recall": {
+            "point": 0.12195121951219512,
+            "lo": 0.0,
+            "hi": 0.24528301886792453,
+            "mean": 0.11560861223542923,
+            "std": 0.0687350246082963,
+            "n_boot": 2000,
+            "ci_level": 0.95,
+            "seed": 42
+          }
+        }
+      },
+      "secondary": {
+        "strategy": "greedy_onset",
+        "per_subject": {
+          "001": {
+            "n_recordings": 8,
+            "n_frames": 19016,
+            "recording_hours": 0.17607407407407408,
+            "alert_hours": 0.08733333333333333,
+            "tp": 2,
+            "fp": 78,
+            "fn": 11,
+            "recall": 0.15384615384615385,
+            "precision": 0.025,
+            "miss_rate": 0.8461538461538461,
+            "f1": 0.043010752688172046,
+            "fa_per_hour_total": 442.99537231804794,
+            "fa_per_hour_alert": 893.1297709923664,
+            "n_gt_episodes": 13,
+            "n_alarm_events": 80,
+            "alarm_duty_cycle": 0.005626840555321835,
+            "latency": {
+              "n": 2,
+              "median": 27.233333333333334,
+              "q1": 25.000000000000004,
+              "q3": 29.46666666666667,
+              "iqr": 4.466666666666665,
+              "min": 22.76666666666667,
+              "max": 31.700000000000003,
+              "mean": 27.233333333333334
+            }
+          },
+          "002": {
+            "n_recordings": 8,
+            "n_frames": 18833,
+            "recording_hours": 0.17437962962962963,
+            "alert_hours": 0.07626851851851851,
+            "tp": 8,
+            "fp": 644,
+            "fn": 3,
+            "recall": 0.7272727272727273,
+            "precision": 0.012269938650306749,
+            "miss_rate": 0.2727272727272727,
+            "f1": 0.024132730015082957,
+            "fa_per_hour_total": 3693.0919131312057,
+            "fa_per_hour_alert": 8443.85091659585,
+            "n_gt_episodes": 11,
+            "n_alarm_events": 652,
+            "alarm_duty_cycle": 0.05447884033345723,
+            "latency": {
+              "n": 8,
+              "median": 8.7,
+              "q1": 2.066666666666666,
+              "q3": 15.35,
+              "iqr": 13.283333333333333,
+              "min": 1.2999999999999972,
+              "max": 18.133333333333333,
+              "mean": 8.954166666666666
+            }
+          },
+          "005": {
+            "n_recordings": 8,
+            "n_frames": 21933,
+            "recording_hours": 0.20308333333333334,
+            "alert_hours": 0.08190740740740741,
+            "tp": 2,
+            "fp": 1,
+            "fn": 12,
+            "recall": 0.14285714285714285,
+            "precision": 0.6666666666666666,
+            "miss_rate": 0.8571428571428571,
+            "f1": 0.23529411764705882,
+            "fa_per_hour_total": 4.924086992203529,
+            "fa_per_hour_alert": 12.208907981008364,
+            "n_gt_episodes": 14,
+            "n_alarm_events": 3,
+            "alarm_duty_cycle": 0.0001823735923038344,
+            "latency": {
+              "n": 2,
+              "median": 22.283333333333335,
+              "q1": 15.325000000000001,
+              "q3": 29.241666666666667,
+              "iqr": 13.916666666666666,
+              "min": 8.366666666666667,
+              "max": 36.2,
+              "mean": 22.283333333333335
+            }
+          },
+          "006": {
+            "n_recordings": 3,
+            "n_frames": 6739,
+            "recording_hours": 0.06239814814814815,
+            "alert_hours": 0.036814814814814814,
+            "tp": 0,
+            "fp": 0,
+            "fn": 3,
+            "recall": 0.0,
+            "precision": 0.0,
+            "miss_rate": 1.0,
+            "f1": 0.0,
+            "fa_per_hour_total": 0.0,
+            "fa_per_hour_alert": 0.0,
+            "n_gt_episodes": 3,
+            "n_alarm_events": 0,
+            "alarm_duty_cycle": 0.0,
+            "latency": {
+              "n": 0,
+              "median": NaN,
+              "q1": NaN,
+              "q3": NaN,
+              "iqr": NaN,
+              "min": NaN,
+              "max": NaN,
+              "mean": NaN
+            }
+          }
+        },
+        "pooled_micro": {
+          "tp": 12,
+          "fp": 723,
+          "fn": 29,
+          "recall": 0.2926829268292683,
+          "precision": 0.0163265306122449,
+          "miss_rate": 0.7073170731707317,
+          "f1": 0.030927835051546393,
+          "recording_hours": 0.6159351851851852,
+          "alert_hours": 0.28232407407407406,
+          "fa_per_hour_total": 1173.8248072037402,
+          "fa_per_hour_alert": 2560.8868190613625,
+          "latency": {
+            "n": 12,
+            "median": 12.483333333333333,
+            "q1": 6.316666666666666,
+            "q3": 19.291666666666668,
+            "iqr": 12.975000000000001,
+            "min": 1.2999999999999972,
+            "max": 36.2,
+            "mean": 14.222222222222223
+          }
+        },
+        "macro_over_subjects": {
+          "recall": 0.255994005994006,
+          "precision": 0.17598415132924333,
+          "miss_rate": 0.744005994005994,
+          "f1": 0.07560940008757845,
+          "fa_per_hour_total": 1035.2528431103642,
+          "fa_per_hour_alert": 2337.297398892306
+        },
+        "k_sweep": [
+          {
+            "k_seconds": 0.0,
+            "tolerance_frames": 1,
+            "tp": 12,
+            "fp": 723,
+            "fn": 29,
+            "recall": 0.2926829268292683,
+            "precision": 0.0163265306122449,
+            "f1": 0.030927835051546393,
+            "fa_per_hour_total": 1173.8248072037402
+          },
+          {
+            "k_seconds": 0.25,
+            "tolerance_frames": 8,
+            "tp": 1,
+            "fp": 734,
+            "fn": 40,
+            "recall": 0.024390243902439025,
+            "precision": 0.0013605442176870747,
+            "f1": 0.002577319587628866,
+            "fa_per_hour_total": 1191.6838291667293
+          },
+          {
+            "k_seconds": 0.5,
+            "tolerance_frames": 15,
+            "tp": 1,
+            "fp": 734,
+            "fn": 40,
+            "recall": 0.024390243902439025,
+            "precision": 0.0013605442176870747,
+            "f1": 0.002577319587628866,
+            "fa_per_hour_total": 1191.6838291667293
+          },
+          {
+            "k_seconds": 1.0,
+            "tolerance_frames": 30,
+            "tp": 0,
+            "fp": 735,
+            "fn": 41,
+            "recall": 0.0,
+            "precision": 0.0,
+            "f1": 0.0,
+            "fa_per_hour_total": 1193.3073766179102
+          },
+          {
+            "k_seconds": 2.0,
+            "tolerance_frames": 60,
+            "tp": 0,
+            "fp": 735,
+            "fn": 41,
+            "recall": 0.0,
+            "precision": 0.0,
+            "f1": 0.0,
+            "fa_per_hour_total": 1193.3073766179102
+          }
+        ],
+        "bootstrap_descriptive": {
+          "note": "Subject-stratified percentile bootstrap dispersion band (B=2000, seed 42). NOT a significance test: with n=4 subjects it bounds within-sample dispersion only (plan \u00a7Statistics).",
+          "fa_per_hour_total": {
+            "point": 1173.8248072037402,
+            "lo": 3.766741071428571,
+            "hi": 2874.6606634443488,
+            "mean": 1169.8761237836513,
+            "std": 836.7840643228383,
+            "n_boot": 2000,
+            "ci_level": 0.95,
+            "seed": 42
+          },
+          "recall": {
+            "point": 0.2926829268292683,
+            "lo": 0.09090909090909091,
+            "hi": 0.5714285714285714,
+            "mean": 0.29303258400757287,
+            "std": 0.13964553515109532,
+            "n_boot": 2000,
+            "ci_level": 0.95,
+            "seed": 42
+          }
+        }
+      },
+      "debounced_primary": {
+        "strategy": "max_overlap",
+        "per_subject": {
+          "001": {
+            "n_recordings": 8,
+            "n_frames": 19016,
+            "recording_hours": 0.17607407407407408,
+            "alert_hours": 0.08733333333333333,
+            "tp": 0,
+            "fp": 0,
+            "fn": 13,
+            "recall": 0.0,
+            "precision": 0.0,
+            "miss_rate": 1.0,
+            "f1": 0.0,
+            "fa_per_hour_total": 0.0,
+            "fa_per_hour_alert": 0.0,
+            "n_gt_episodes": 13,
+            "n_alarm_events": 0,
+            "alarm_duty_cycle": 0.0,
+            "latency": {
+              "n": 0,
+              "median": NaN,
+              "q1": NaN,
+              "q3": NaN,
+              "iqr": NaN,
+              "min": NaN,
+              "max": NaN,
+              "mean": NaN
+            }
+          },
+          "002": {
+            "n_recordings": 8,
+            "n_frames": 18833,
+            "recording_hours": 0.17437962962962963,
+            "alert_hours": 0.07626851851851851,
+            "tp": 1,
+            "fp": 0,
+            "fn": 10,
+            "recall": 0.09090909090909091,
+            "precision": 1.0,
+            "miss_rate": 0.9090909090909091,
+            "f1": 0.16666666666666669,
+            "fa_per_hour_total": 0.0,
+            "fa_per_hour_alert": 0.0,
+            "n_gt_episodes": 11,
+            "n_alarm_events": 1,
+            "alarm_duty_cycle": 0.004778845643285722,
+            "latency": {
+              "n": 1,
+              "median": 38.666666666666664,
+              "q1": 38.666666666666664,
+              "q3": 38.666666666666664,
+              "iqr": 0.0,
+              "min": 38.666666666666664,
+              "max": 38.666666666666664,
+              "mean": 38.666666666666664
+            }
+          },
+          "005": {
+            "n_recordings": 8,
+            "n_frames": 21933,
+            "recording_hours": 0.20308333333333334,
+            "alert_hours": 0.08190740740740741,
+            "tp": 4,
+            "fp": 3,
+            "fn": 10,
+            "recall": 0.2857142857142857,
+            "precision": 0.5714285714285714,
+            "miss_rate": 0.7142857142857143,
+            "f1": 0.38095238095238093,
+            "fa_per_hour_total": 14.772260976610587,
+            "fa_per_hour_alert": 36.62672394302509,
+            "n_gt_episodes": 14,
+            "n_alarm_events": 7,
+            "alarm_duty_cycle": 0.04399762914330005,
+            "latency": {
+              "n": 4,
+              "median": 3.8000000000000025,
+              "q1": 2.950000000000003,
+              "q3": 15.383333333333333,
+              "iqr": 12.43333333333333,
+              "min": 1.5,
+              "max": 49.03333333333333,
+              "mean": 14.533333333333335
+            }
+          },
+          "006": {
+            "n_recordings": 3,
+            "n_frames": 6739,
+            "recording_hours": 0.06239814814814815,
+            "alert_hours": 0.036814814814814814,
+            "tp": 0,
+            "fp": 0,
+            "fn": 3,
+            "recall": 0.0,
+            "precision": 0.0,
+            "miss_rate": 1.0,
+            "f1": 0.0,
+            "fa_per_hour_total": 0.0,
+            "fa_per_hour_alert": 0.0,
+            "n_gt_episodes": 3,
+            "n_alarm_events": 0,
+            "alarm_duty_cycle": 0.0,
+            "latency": {
+              "n": 0,
+              "median": NaN,
+              "q1": NaN,
+              "q3": NaN,
+              "iqr": NaN,
+              "min": NaN,
+              "max": NaN,
+              "mean": NaN
+            }
+          }
+        },
+        "pooled_micro": {
+          "tp": 5,
+          "fp": 3,
+          "fn": 36,
+          "recall": 0.12195121951219512,
+          "precision": 0.625,
+          "miss_rate": 0.8780487804878049,
+          "f1": 0.20408163265306123,
+          "recording_hours": 0.6159351851851852,
+          "alert_hours": 0.28232407407407406,
+          "fa_per_hour_total": 4.8706423535424905,
+          "fa_per_hour_alert": 10.626086386146733,
+          "latency": {
+            "n": 5,
+            "median": 4.166666666666668,
+            "q1": 3.433333333333337,
+            "q3": 38.666666666666664,
+            "iqr": 35.23333333333333,
+            "min": 1.5,
+            "max": 49.03333333333333,
+            "mean": 19.36
+          }
+        },
+        "macro_over_subjects": {
+          "recall": 0.09415584415584416,
+          "precision": 0.39285714285714285,
+          "miss_rate": 0.9058441558441559,
+          "f1": 0.13690476190476192,
+          "fa_per_hour_total": 3.693065244152647,
+          "fa_per_hour_alert": 9.156680985756273
+        },
+        "k_sweep": [
+          {
+            "k_seconds": 0.0,
+            "tolerance_frames": 1,
+            "tp": 5,
+            "fp": 3,
+            "fn": 36,
+            "recall": 0.12195121951219512,
+            "precision": 0.625,
+            "f1": 0.20408163265306123,
+            "fa_per_hour_total": 4.8706423535424905
+          },
+          {
+            "k_seconds": 0.25,
+            "tolerance_frames": 8,
+            "tp": 5,
+            "fp": 3,
+            "fn": 36,
+            "recall": 0.12195121951219512,
+            "precision": 0.625,
+            "f1": 0.20408163265306123,
+            "fa_per_hour_total": 4.8706423535424905
+          },
+          {
+            "k_seconds": 0.5,
+            "tolerance_frames": 15,
+            "tp": 5,
+            "fp": 3,
+            "fn": 36,
+            "recall": 0.12195121951219512,
+            "precision": 0.625,
+            "f1": 0.20408163265306123,
+            "fa_per_hour_total": 4.8706423535424905
+          },
+          {
+            "k_seconds": 1.0,
+            "tolerance_frames": 30,
+            "tp": 5,
+            "fp": 3,
+            "fn": 36,
+            "recall": 0.12195121951219512,
+            "precision": 0.625,
+            "f1": 0.20408163265306123,
+            "fa_per_hour_total": 4.8706423535424905
+          },
+          {
+            "k_seconds": 2.0,
+            "tolerance_frames": 60,
+            "tp": 5,
+            "fp": 3,
+            "fn": 36,
+            "recall": 0.12195121951219512,
+            "precision": 0.625,
+            "f1": 0.20408163265306123,
+            "fa_per_hour_total": 4.8706423535424905
+          }
+        ],
+        "bootstrap_descriptive": {
+          "note": "Subject-stratified percentile bootstrap dispersion band (B=2000, seed 42). NOT a significance test: with n=4 subjects it bounds within-sample dispersion only (plan \u00a7Statistics).",
+          "fa_per_hour_total": {
+            "point": 4.8706423535424905,
+            "lo": 0.0,
+            "hi": 11.485017487475186,
+            "mean": 4.529352990445589,
+            "std": 3.760357387944575,
+            "n_boot": 2000,
+            "ci_level": 0.95,
+            "seed": 42
+          },
+          "recall": {
+            "point": 0.12195121951219512,
+            "lo": 0.0,
+            "hi": 0.24528301886792453,
+            "mean": 0.11560861223542923,
+            "std": 0.0687350246082963,
+            "n_boot": 2000,
+            "ci_level": 0.95,
+            "seed": 42
+          }
+        }
+      },
+      "contamination_delta": {
+        "primary_total_edges": 18,
+        "secondary_total_edges": 1469,
+        "edge_count_abs_delta": 1483,
+        "boundary_window_frames": 5,
+        "secondary_edges_near_boundary": 0,
+        "secondary_edges_total": 1469,
+        "secondary_edge_boundary_fraction": 0.0,
+        "fp_events_primary": 4,
+        "fp_events_secondary": 723,
+        "fp_events_delta": 719,
+        "tp_events_primary": 5,
+        "tp_events_secondary": 12,
+        "tp_events_delta": 7,
+        "note": "Reported finding, not pass/fail. Near-zero delta => boundary carryover negligible for this corpus; large delta justifies PRIMARY (per-recording reset) as the headline regime."
+      }
+    }
+  }
+}

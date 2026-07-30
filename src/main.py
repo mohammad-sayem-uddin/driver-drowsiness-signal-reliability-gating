@@ -229,13 +229,15 @@ def main():
             else:
                 face_brightness = 128.0
 
-            # 3. Tracking confidence
-            tracking_conf = float(face_lm.landmark[1].visibility) if hasattr(face_lm.landmark[1], 'visibility') else 0.9
-
+            # NOTE: A per-frame tracking-confidence signal was removed
+            # from the reliability gate. MediaPipe FaceMesh does not
+            # populate a real per-landmark visibility/confidence value,
+            # so it would only ever be a constant (freeze-report
+            # precondition 4). Reliability now uses 3 real components:
+            # landmark stability, brightness, and cue consistency.
             sig_quality = SignalQuality(
                 landmark_jitter=jitter,
                 frame_brightness=face_brightness,
-                tracking_confidence=tracking_conf,
                 face_visible=True,
             )
         else:
@@ -452,6 +454,16 @@ def main():
         # ═════════════════════════════════════════════════════════════
         fus_y = 95  # Fusion panel starts right below the accent line
         cv2.rectangle(frame, (0, fus_y), (w, fus_y + 40), _DARKER, -1)
+
+        # Driver status badge (top-right). `status` is reused by the
+        # full-screen alert block below, so define it here.
+        status = system_state.status
+        if status in (DriverStatus.SEVERE_FATIGUE, DriverStatus.DROWSY,
+                      DriverStatus.FACE_LOST_CRITICAL):
+            badge_color, badge_text = _RED, "DRIVER STATUS: DANGER"
+        elif status in (DriverStatus.MODERATE_FATIGUE, DriverStatus.SLIGHT_FATIGUE,
+                        DriverStatus.FACE_LOST):
+            badge_color, badge_text = _ORANGE, "DRIVER STATUS: WARNING"
         else:
             badge_color, badge_text = (0, 150, 0), "DRIVER STATUS: OK"
 

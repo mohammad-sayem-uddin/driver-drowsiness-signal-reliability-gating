@@ -1,0 +1,26 @@
+{
+ "V0_vs_V2": {
+  "a_right_b_wrong": 77,
+  "a_wrong_b_right": 143,
+  "chi2": 19.204545454545453,
+  "p": 1.1743343442782717e-05
+ },
+ "V0_vs_V1": {
+  "a_right_b_wrong": 1183,
+  "a_wrong_b_right": 642,
+  "chi2": 159.78082191780823,
+  "p": 0.0
+ },
+ "V0_vs_V3": {
+  "a_right_b_wrong": 1278,
+  "a_wrong_b_right": 795,
+  "chi2": 112.07139411480945,
+  "p": 0.0
+ },
+ "V2_vs_V3": {
+  "a_right_b_wrong": 1201,
+  "a_wrong_b_right": 652,
+  "chi2": 162.0636805180788,
+  "p": 0.0
+ }
+}

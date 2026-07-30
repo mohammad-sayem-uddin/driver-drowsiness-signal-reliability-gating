@@ -1,0 +1,13 @@
+subject,glasses,condition,start_idx,end_idx,onset_ts,offset_ts,duration,n_frames,peak_alarm_level,any_cnn_override,any_alert_suppressed,any_face_lost_critical
+002,noglasses,sleepyCombination,1383,1458,46.100000,48.600000,2.500000,76,2,0,0,0
+002,noglasses,slowBlinkWithNodding,892,1001,29.733333,33.366667,3.633333,110,1,0,0,0
+005,noglasses,nonsleepyCombination,1448,1507,48.266667,50.233333,1.966667,60,1,0,0,0
+005,noglasses,nonsleepyCombination,2938,3019,97.933333,100.633333,2.700000,82,1,0,0,0
+005,noglasses,sleepyCombination,451,600,15.033333,20.000000,4.966667,150,2,0,0,0
+005,noglasses,sleepyCombination,1146,1205,38.200000,40.166667,1.966667,60,1,0,0,0
+005,noglasses,sleepyCombination,1715,2060,57.166667,68.666667,11.500000,346,2,0,0,0
+005,noglasses,sleepyCombination,2734,2793,91.133333,93.100000,1.966667,60,2,0,0,0
+005,noglasses,sleepyCombination,2864,2939,95.466667,97.966667,2.500000,76,2,0,0,0
+005,noglasses,yawning,519,594,17.300000,19.800000,2.500000,76,2,0,0,0
+005,noglasses,yawning,1402,1521,46.733333,50.700000,3.966667,120,2,0,0,0
+005,noglasses,yawning,1848,1968,61.600000,65.600000,4.000000,121,2,0,0,0

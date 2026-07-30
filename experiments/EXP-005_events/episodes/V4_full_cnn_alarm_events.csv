@@ -1,0 +1,10 @@
+subject,glasses,condition,start_idx,end_idx,onset_ts,offset_ts,duration,n_frames,peak_alarm_level,any_cnn_override,any_alert_suppressed,any_face_lost_critical
+002,noglasses,sleepyCombination,1399,1458,46.633333,48.600000,1.966667,60,1,0,0,0
+005,noglasses,nonsleepyCombination,1450,1509,48.333333,50.300000,1.966667,60,1,0,0,0
+005,noglasses,sleepyCombination,454,597,15.133333,19.900000,4.766667,144,2,0,0,0
+005,noglasses,sleepyCombination,1720,2060,57.333333,68.666667,11.333333,341,2,0,0,0
+005,noglasses,sleepyCombination,2739,2798,91.300000,93.266667,1.966667,60,2,0,0,0
+005,noglasses,sleepyCombination,2897,2956,96.566667,98.533333,1.966667,60,2,0,0,0
+005,noglasses,yawning,532,591,17.733333,19.700000,1.966667,60,1,0,0,0
+005,noglasses,yawning,1405,1524,46.833333,50.800000,3.966667,120,2,0,0,0
+005,noglasses,yawning,1852,1911,61.733333,63.700000,1.966667,60,2,0,0,0

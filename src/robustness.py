@@ -12,9 +12,13 @@ under good conditions.
 Design principles:
     1. Graceful degradation — reliability is continuous, not binary.
        There is no hard cutoff where the system "gives up."
-    2. Four independent sub-scores — landmark stability, frame
-       brightness, tracking confidence, cue consistency — each
-       capturing a different failure mode.
+    2. Three independent sub-scores — landmark stability, frame
+       brightness, and cue consistency — each capturing a different
+       failure mode.  (A per-frame tracking-confidence channel was
+       removed: MediaPipe FaceMesh does not populate a per-landmark
+       ``visibility``/confidence value, so any such component would be
+       a constant, not a real signal.  See CHANGELOG / freeze report
+       precondition 4.)
     3. Multiplicative composition — the final reliability is the
        weighted product of sub-scores, so a single severely degraded
        channel can dominate.
@@ -64,10 +68,6 @@ class SignalQuality:
     # Computed on the grayscale face ROI.  0.0 if no face.
     frame_brightness: float = 128.0
 
-    # MediaPipe face detection confidence (0–1) for the primary face.
-    # Forwarded from FaceLandmarkerResult.  0.0 if no face.
-    tracking_confidence: float = 1.0
-
     # Whether a face was detected this frame.
     face_visible: bool = True
 
@@ -85,7 +85,6 @@ class RobustnessSnapshot:
     # --- Sub-scores (0–1 each, higher = better) ---
     landmark_stability: float = 1.0
     brightness_quality: float = 1.0
-    tracking_quality: float = 1.0
     cue_consistency: float = 1.0
 
     # --- Final reliability (0–1, higher = more trustworthy) ---
@@ -114,15 +113,15 @@ class LearnedReliabilityEstimator:
         R_learned(S; w, b, T) = sigmoid((w^T * ln(S + epsilon) + b) / T)
 
     Theoretical Grounding:
-    When w = [0.35, 0.25, 0.20, 0.20], b = 0.0, and T = 1.0, this formulation
+    When w = [0.45, 0.30, 0.25], b = 0.0, and T = 1.0, this formulation
     analytically reduces to the weighted geometric mean:
-        exp(0.35*ln S_stab + 0.25*ln S_bright + 0.20*ln S_track + 0.20*ln S_consist)
-      = S_stab^0.35 * S_bright^0.25 * S_track^0.20 * S_consist^0.20
+        exp(0.45*ln S_stab + 0.30*ln S_bright + 0.25*ln S_consist)
+      = S_stab^0.45 * S_bright^0.30 * S_consist^0.25
     """
 
     def __init__(
         self,
-        weights: Tuple[float, float, float, float] = (0.35, 0.25, 0.20, 0.20),
+        weights: Tuple[float, float, float] = (0.45, 0.30, 0.25),
         bias: float = 0.0,
         temperature: float = 1.0,
         epsilon: float = 1e-6,
@@ -136,25 +135,21 @@ class LearnedReliabilityEstimator:
         self,
         stability: float,
         brightness: float,
-        tracking: float,
         consistency: float,
     ) -> float:
         s_stab = max(self.epsilon, float(stability))
         s_bright = max(self.epsilon, float(brightness))
-        s_track = max(self.epsilon, float(tracking))
         s_consist = max(self.epsilon, float(consistency))
 
         # Log-space feature transformation
         log_stab = math.log(s_stab)
         log_bright = math.log(s_bright)
-        log_track = math.log(s_track)
         log_consist = math.log(s_consist)
 
         logit = (
             self.weights[0] * log_stab
             + self.weights[1] * log_bright
-            + self.weights[2] * log_track
-            + self.weights[3] * log_consist
+            + self.weights[2] * log_consist
             + self.bias
         ) / self.temperature
 
@@ -180,11 +175,10 @@ class RobustnessGuard:
     Per-frame pipeline:
         1. Score landmark stability (jitter → 0–1).
         2. Score frame brightness (too dark / too bright → penalty).
-        3. Score tracking confidence (direct from MediaPipe).
-        4. Score cue consistency (variance of fusion confidences).
-        5. Evaluate heuristic vs learned reliability.
-        6. EMA-smooth the reliability to prevent flicker.
-        7. Recommend alert suppression if reliability is very low.
+        3. Score cue consistency (variance of fusion confidences).
+        4. Evaluate heuristic vs learned reliability.
+        5. EMA-smooth the reliability to prevent flicker.
+        6. Recommend alert suppression if reliability is very low.
     """
 
     def __init__(self, cfg: SystemConfig):
@@ -256,7 +250,6 @@ class RobustnessGuard:
             return RobustnessSnapshot(
                 landmark_stability=0.0,
                 brightness_quality=0.5,
-                tracking_quality=0.0,
                 cue_consistency=0.5,
                 system_reliability=self._smoothed_reliability,
                 heuristic_reliability=self._smoothed_reliability,
@@ -275,25 +268,23 @@ class RobustnessGuard:
         # ── Step 2: Brightness quality ──────────────────────────────
         brightness = self._score_brightness(sq.frame_brightness)
 
-        # ── Step 3: Tracking quality ────────────────────────────────
-        tracking = self._score_tracking(sq.tracking_confidence)
-
-        # ── Step 4: Cue consistency ─────────────────────────────────
+        # ── Step 3: Cue consistency ─────────────────────────────────
         consistency = self._score_cue_consistency(ear_conf, mar_conf, pose_conf)
 
-        # ── Step 5: Combine sub-scores ──────────────────────────────
-        # Classical Heuristic Geometric Mean
+        # ── Step 4: Combine sub-scores ──────────────────────────────
+        # Classical Heuristic Geometric Mean (3 real components,
+        # weights renormalized to sum to 1.0 after dropping the phantom
+        # tracking-confidence channel — see freeze-report precondition 4).
         heuristic_reliability = (
-            (stability ** 0.35)
-            * (brightness ** 0.25)
-            * (tracking ** 0.20)
-            * (consistency ** 0.20)
+            (stability ** 0.45)
+            * (brightness ** 0.30)
+            * (consistency ** 0.25)
         )
         heuristic_reliability = max(0.0, min(1.0, heuristic_reliability))
 
         # Learned Estimator Score
         learned_reliability = self.learned_estimator.estimate(
-            stability, brightness, tracking, consistency
+            stability, brightness, consistency
         )
 
         # Select Mode
@@ -304,19 +295,18 @@ class RobustnessGuard:
         else:
             target_reliability = heuristic_reliability
 
-        # ── Step 6: EMA smooth ──────────────────────────────────────
+        # ── Step 5: EMA smooth ──────────────────────────────────────
         self._smoothed_reliability = (
             self._ema_alpha * target_reliability
             + (1.0 - self._ema_alpha) * self._smoothed_reliability
         )
 
-        # ── Step 7: Alert suppression recommendation ────────────────
+        # ── Step 6: Alert suppression recommendation ────────────────
         suppressed = self._smoothed_reliability < self._suppress_thresh
 
         return RobustnessSnapshot(
             landmark_stability=stability,
             brightness_quality=brightness,
-            tracking_quality=tracking,
             cue_consistency=consistency,
             system_reliability=self._smoothed_reliability,
             heuristic_reliability=heuristic_reliability,
@@ -389,17 +379,6 @@ class RobustnessGuard:
             t = (brightness - self._bright_high) / (240 - self._bright_high)
             return 1.0 - t * 0.5
         return 0.5
-
-    def _score_tracking(self, confidence: float) -> float:
-        """
-        Map MediaPipe tracking confidence to a 0–1 quality score.
-
-        Direct pass-through with a floor at 0.2 — even at very low
-        MediaPipe confidence, the landmarks may still be partially
-        usable (MediaPipe sometimes tracks through brief occlusions
-        with low reported confidence).
-        """
-        return max(0.2, min(1.0, confidence))
 
     def _score_cue_consistency(
         self, ear_conf: float, mar_conf: float, pose_conf: float
